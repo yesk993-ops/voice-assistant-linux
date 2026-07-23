@@ -664,7 +664,7 @@ HUD_HTML = """
         </button>
     </footer>
 
-    <!-- WEB SPEECH API INTEGRATION -->
+    <!-- WEB SPEECH API INTEGRATION — GEMINI-STYLE HANDS-FREE VOICE -->
     <script>
         const terminalOutput = document.getElementById('terminal-output');
         const userInput = document.getElementById('user-input');
@@ -673,52 +673,139 @@ HUD_HTML = """
         const arcReactor = document.getElementById('arc-reactor');
         const diagLogs = document.getElementById('diag-logs');
 
-        // State variables
+        // ── State ──────────────────────────────────────────────
         let isSpeaking = false;
         let isRecognizing = false;
+        let recognitionRestartPending = false;
+        let lastTranscriptTime = 0;
 
-        // Initialize Web Speech Synthesis (TTS)
+        // ── Speech Synthesis ───────────────────────────────────
         const synth = window.speechSynthesis;
 
-        // Initialize Web Speech Recognition (STT)
+        // ── Speech Recognition ─────────────────────────────────
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
 
-            recognition.onstart = () => {
+        function createRecognition() {
+            if (!SpeechRecognition) {
+                console.warn("Web Speech API not supported on this browser.");
+                addLog('SYSTEM', 'MIC UNSUPPORTED');
+                return null;
+            }
+            const rec = new SpeechRecognition();
+            rec.continuous = true;
+            rec.interimResults = true;
+            rec.lang = 'en-US';
+            rec.maxAlternatives = 1;
+
+            rec.onstart = () => {
                 setReactorState('listening');
-                addLog('MIC', 'ACCESSING');
+                addLog('MIC', 'HOT');
                 isRecognizing = true;
             };
 
-            recognition.onerror = (e) => {
-                console.error(e);
-                setReactorState('idle');
-                addLog('MIC', 'ERROR: ' + e.error);
+            rec.onerror = (e) => {
+                console.error('SpeechRecognition error:', e.error);
+                if (e.error === 'not-allowed') {
+                    addLog('MIC', 'BLOCKED — allow mic in browser settings');
+                    return;
+                }
+                // For recoverable errors, restart
+                if (e.error !== 'aborted') {
+                    scheduleRecognitionRestart();
+                }
                 isRecognizing = false;
             };
 
-            recognition.onend = () => {
-                setReactorState('idle');
+            rec.onend = () => {
                 isRecognizing = false;
+                // Auto-restart unless interrupted by speaking or manual stop
+                if (!recognitionRestartPending && !synth.speaking) {
+                    startRecognition();
+                } else if (!synth.speaking) {
+                    startRecognition();
+                    recognitionRestartPending = false;
+                }
             };
 
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                addLog('SPEECH', transcript);
-                userInput.value = transcript;
-                sendCommand(transcript);
+            rec.onresult = (event) => {
+                let finalTranscript = '';
+                let interimTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        finalTranscript += result[0].transcript;
+                    } else {
+                        interimTranscript += result[0].transcript;
+                    }
+                }
+
+                // Show interim feedback in the terminal area
+                if (interimTranscript && !finalTranscript) {
+                    showInterim(interimTranscript);
+                }
+
+                // Process final transcript
+                if (finalTranscript) {
+                    const trimmed = finalTranscript.trim().toLowerCase();
+                    if (trimmed) {
+                        lastTranscriptTime = Date.now();
+                        addLog('SPEECH', trimmed);
+                        userInput.value = trimmed;
+                        showInterim('');  // Clear interim
+                        
+                        // If J.A.R.V.I.S. is speaking, interrupt it — user is talking now
+                        if (synth.speaking) {
+                            synth.cancel();
+                            setReactorState('idle');
+                        }
+                        
+                        sendCommand(trimmed);
+                    }
+                }
             };
-        } else {
-            console.warn("Web Speech API not supported on this browser.");
-            addLog('SYSTEM', 'MIC UNSUPPORTED');
+
+            return rec;
         }
 
-        // Add log entry
+        function startRecognition() {
+            if (!recognition) {
+                recognition = createRecognition();
+            }
+            if (!recognition || isRecognizing) return;
+            try {
+                // Cancel any ongoing speech first
+                if (synth.speaking) synth.cancel();
+                recognition.start();
+            } catch (e) {
+                console.warn('Recognition start failed:', e);
+                // Chrome sometimes throws if start is called too soon after a previous session
+                setTimeout(() => {
+                    try { recognition.start(); } catch (ex) { /* ignore */ }
+                }, 300);
+            }
+        }
+
+        function stopRecognition() {
+            if (recognition && isRecognizing) {
+                try { recognition.stop(); } catch (e) { /* ignore */ }
+            }
+            isRecognizing = false;
+        }
+
+        function scheduleRecognitionRestart() {
+            if (recognitionRestartPending) return;
+            recognitionRestartPending = true;
+            setTimeout(() => {
+                recognitionRestartPending = false;
+                if (!isRecognizing && !synth.speaking) {
+                    startRecognition();
+                }
+            }, 500);
+        }
+
+        // ── Logging ───────────────────────────────────────────
         function addLog(tag, msg) {
             const time = new Date().toLocaleTimeString();
             const li = document.createElement('li');
@@ -730,7 +817,7 @@ HUD_HTML = """
             }
         }
 
-        // Set Arc Reactor state colors/speeds
+        // ── Arc Reactor Visual States ─────────────────────────
         function setReactorState(state) {
             arcReactor.className = 'arc-reactor-wrapper';
             if (state !== 'idle') {
@@ -738,60 +825,113 @@ HUD_HTML = """
             }
         }
 
-        // Toggle Voice Input
+        // ── Interim transcript display ────────────────────────
+        let interimEl = null;
+        function showInterim(text) {
+            if (!interimEl) {
+                interimEl = document.createElement('div');
+                interimEl.className = 'terminal-text';
+                interimEl.style.color = '#94a3b8';
+                interimEl.style.fontStyle = 'italic';
+                terminalOutput.appendChild(interimEl);
+            }
+            if (text) {
+                interimEl.textContent = '🎤 ' + text;
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            } else {
+                interimEl.remove();
+                interimEl = null;
+            }
+        }
+
+        // ── Toggle Mic (for manual click) ─────────────────────
         function toggleVoice() {
             if (!recognition) {
-                addSpeechTerminal("J.A.R.V.I.S.", "My apologies, Sir. Speech recognition is not supported on this browser. Please input your query manually.");
+                recognition = createRecognition();
+            }
+            if (!recognition) {
+                addSpeechTerminal('J.A.R.V.I.S.', 'Speech recognition is not supported on this browser. Please type your query instead.');
                 return;
             }
             if (isRecognizing) {
-                recognition.stop();
+                stopRecognition();
+                addLog('MIC', 'MANUAL STOP');
+                setReactorState('idle');
+                startVoiceBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" x2="12" y1="19" y2="22"/></svg> VOICE INPUT';
             } else {
-                if (synth.speaking) {
-                    synth.cancel();
-                }
-                recognition.start();
+                if (synth.speaking) synth.cancel();
+                startRecognition();
+                startVoiceBtn.innerHTML = '<span style="color:#ff5714">●</span> MIC ON';
             }
         }
 
         startVoiceBtn.addEventListener('click', toggleVoice);
         reactorCore.addEventListener('click', toggleVoice);
 
-        // Speech Synthesis speaker with custom robo-J.A.R.V.I.S voice settings
+        // ── Gemini-Style Natural TTS ──────────────────────────
+        let voicesLoaded = false;
+        synth.onvoiceschanged = () => { voicesLoaded = true; };
+
         function jarvisSpeak(text) {
-            if (!synth) return;
-            
-            // Cancel current speech
-            synth.cancel();
+            if (!synth || !text) return;
+
+            // Stop mic briefly while speaking (to avoid hearing own voice)
+            wasRecognizing = isRecognizing;
+            if (isRecognizing) {
+                try { recognition.stop(); } catch (e) {}
+                isRecognizing = false;
+            }
 
             setReactorState('speaking');
             addLog('JARVIS', 'SPEAKING');
+            isSpeaking = true;
 
             const utterance = new SpeechSynthesisUtterance(text);
-            
-            // Find a good male English voice or local default
+
+            // Prefer natural-sounding voices
             const voices = synth.getVoices();
-            let voice = voices.find(v => v.name.toLowerCase().includes('google us english') || v.name.toLowerCase().includes('microsoft david'));
-            if (!voice) {
-                voice = voices.find(v => v.lang.startsWith('en'));
+            let voice = null;
+            // Try Google UK English Female (natural), then Microsoft, then any English
+            const preferred = ['google uk english female', 'google us english', 'microsoft zira', 'microsoft david', 'samantha'];
+            for (const name of preferred) {
+                voice = voices.find(v => v.name.toLowerCase().includes(name));
+                if (voice) break;
             }
-            if (voice) {
-                utterance.voice = voice;
-            }
-            
-            utterance.pitch = 0.85;  // Slightly lower, techy pitch
-            utterance.rate = 1.05;   // Normal rate
+            if (!voice) voice = voices.find(v => v.lang.startsWith('en'));
+            if (voice) utterance.voice = voice;
+
+            // Natural human tone — not robotic
+            utterance.pitch = 1.0;
+            utterance.rate = 0.92;
+            utterance.volume = 1.0;
 
             utterance.onend = () => {
+                isSpeaking = false;
                 setReactorState('idle');
                 addLog('JARVIS', 'DONE');
+                // Restart mic after speaking finishes
+                if (!isRecognizing) {
+                    setTimeout(() => startRecognition(), 200);
+                }
+            };
+
+            utterance.onerror = () => {
+                isSpeaking = false;
+                setReactorState('idle');
+                if (!isRecognizing) {
+                    setTimeout(() => startRecognition(), 200);
+                }
             };
 
             synth.speak(utterance);
         }
+        let wasRecognizing = false;
 
-        // Format terminal display
+        // ── Terminal Display ──────────────────────────────────
         function addSpeechTerminal(sender, text) {
+            // Remove interim if showing
+            showInterim('');
+
             const prompt = document.createElement('div');
             prompt.className = 'terminal-prompt';
             prompt.textContent = `${sender.toUpperCase()} >`;
@@ -805,9 +945,10 @@ HUD_HTML = """
             terminalOutput.scrollTop = terminalOutput.scrollHeight;
         }
 
-        // Send Command to Backend API
+        // ── API Command ───────────────────────────────────────
         function sendCommand(cmdText) {
             if (!cmdText.trim()) return;
+            if (cmdText.length < 2) return;  // Ignore single chars
 
             addSpeechTerminal('USER', cmdText);
             addLog('API', 'POST COMMAND');
@@ -824,22 +965,22 @@ HUD_HTML = """
                 addSpeechTerminal('J.A.R.V.I.S.', data.message);
                 addLog('API', 'RESPONSE RECEIVED');
                 jarvisSpeak(data.spoken || data.message);
-                updateStats(); // Refresh stats in case settings changed
+                updateStats();
             })
             .catch(err => {
                 console.error(err);
                 setReactorState('idle');
-                addSpeechTerminal('J.A.R.V.I.S.', "Sir, my telemetry is reporting an connection exception.");
+                addSpeechTerminal('J.A.R.V.I.S.', "Sir, my telemetry is reporting a connection exception.");
                 addLog('API', 'ERROR');
             });
         }
 
-        // Quick button click command
+        // ── Quick Commands ────────────────────────────────────
         function sendQuickCommand(cmd) {
             sendCommand(cmd);
         }
 
-        // Handle text enter
+        // ── Text Input ────────────────────────────────────────
         function handleEnter(e) {
             if (e.key === 'Enter') {
                 const text = userInput.value;
@@ -848,12 +989,11 @@ HUD_HTML = """
             }
         }
 
-        // Realtime stats poller from system endpoints
+        // ── Telemetry / Gauges ────────────────────────────────
         function updateStats() {
             fetch('/api/status')
             .then(res => res.json())
             .then(data => {
-                // Update gauges
                 document.getElementById('cpu-percent').textContent = data.cpu_percent + '%';
                 document.getElementById('cpu-bar').style.width = data.cpu_percent + '%';
 
@@ -865,7 +1005,6 @@ HUD_HTML = """
 
                 if (data.temp && data.temp !== 'N/A') {
                     document.getElementById('temp-val').textContent = data.temp + '°C';
-                    // map temp 30-90 to 0-100%
                     let temp_pct = Math.min(100, Math.max(0, (data.temp - 30) * 1.6));
                     document.getElementById('temp-bar').style.width = temp_pct + '%';
                 }
@@ -878,9 +1017,12 @@ HUD_HTML = """
             .catch(err => console.debug("Error polling stats:", err));
         }
 
-        // Poll stats every 3.5 seconds
+        // ── Init ──────────────────────────────────────────────
         setInterval(updateStats, 3500);
-        updateStats(); // initial call
+        updateStats();
+        recognition = createRecognition();
+        // Auto-start mic on page load (Gemini style — always ready)
+        setTimeout(() => startRecognition(), 500);
     </script>
 </body>
 </html>
