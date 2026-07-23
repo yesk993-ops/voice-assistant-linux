@@ -150,6 +150,16 @@ If you prefer not to use voice:
 | `systemctl --user disable jarvis` | 🛑 **Remove** auto-start |
 | `journalctl --user -u jarvis -f` | 📝 **View live logs** (press `Ctrl+C` to exit) |
 
+### If the service wasn't installed (manual install):
+
+If you see `Unit jarvis.service could not be found.`, run this once:
+
+```bash
+cd ~/voice-assistant-linux && bash install-service.sh
+```
+
+Then try `systemctl --user start jarvis` again.
+
 ### Quick start/stop flow:
 
 ```bash
