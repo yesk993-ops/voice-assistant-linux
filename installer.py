@@ -171,6 +171,45 @@ UPDATE_COMMAND=sudo apt update && sudo apt upgrade -y
         logger.info("Configuration file written successfully.")
 
 
+def setup_systemd_service():
+    """Install J.A.R.V.I.S. as a systemd user service for easy management"""
+    service_path = os.path.join(INSTALLER_DIR, "voice_assistant", "jarvis.service")
+    if not os.path.isfile(service_path):
+        logger.warning("jarvis.service template not found, skipping systemd setup.")
+        return
+
+    # Read template and substitute INSTALL_DIR placeholder
+    with open(service_path) as f:
+        content = f.read()
+
+    content = content.replace("__INSTALL_DIR__", INSTALLER_DIR)
+
+    # Write to systemd user directory (~/.config/systemd/user/)
+    systemd_dir = os.path.expanduser("~/.config/systemd/user")
+    os.makedirs(systemd_dir, exist_ok=True)
+
+    target_service = os.path.join(systemd_dir, "jarvis.service")
+    with open(target_service, "w") as f:
+        f.write(content)
+
+    logger.info(f"systemd user service installed at: {target_service}")
+
+    # Reload systemd daemon
+    subprocess.run(["systemctl", "--user", "daemon-reload"], capture_output=True)
+    logger.info("systemd daemon reloaded.")
+
+    print()
+    logger.info("=== J.A.R.V.I.S. SYSTEMD SERVICE READY ===")
+    logger.info("Manage J.A.R.V.I.S. with these commands:")
+    logger.info(f"  systemctl --user start jarvis      # Start the web server")
+    logger.info(f"  systemctl --user stop jarvis       # Stop the web server")
+    logger.info(f"  systemctl --user restart jarvis    # Restart with latest changes")
+    logger.info(f"  systemctl --user enable jarvis     # Auto-start on login")
+    logger.info(f"  systemctl --user status jarvis     # Check status")
+    logger.info(f"  journalctl --user -u jarvis -f     # View live logs")
+    logger.info("===========================================")
+
+
 def main():
     logger.info("=== J.A.R.V.I.S. SYSTEM CORE CONVERGENCE ===")
     os_name = platform.system()
@@ -215,7 +254,6 @@ def main():
         result = subprocess.run([pip_path, "install", "-r", reqs_path])
         if result.returncode != 0:
             logger.warning("Some core packages failed to install. Trying individual installs...")
-            # Fallback: install each package individually so one failure doesn't block others
             with open(reqs_path) as f:
                 for line in f:
                     line = line.strip()
@@ -226,7 +264,7 @@ def main():
     else:
         logger.warning(f"Could not find requirements at {reqs_path}")
 
-    # Install optional native-compiled packages (best-effort — may fail on some systems)
+    # Install optional native-compiled packages (best-effort)
     logger.info("Installing optional system-control packages (best-effort)...")
     optional_pkgs = ["pyaudio", "pynput"]
     for pkg in optional_pkgs:
@@ -243,7 +281,11 @@ def main():
     # Step 4: Write default configuration
     setup_config_file()
 
-    # Step 5: Boot J.A.R.V.I.S.!
+    # Step 5: Install systemd service (Linux only)
+    if os_name == "Linux":
+        setup_systemd_service()
+
+    # Step 6: Boot J.A.R.V.I.S.!
     logger.info("Setup complete! Initializing J.A.R.V.I.S. Core Web HUD...")
     server_path = os.path.join(INSTALLER_DIR, "voice_assistant", "web_server.py")
 

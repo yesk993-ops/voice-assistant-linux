@@ -1,0 +1,18 @@
+[Unit]
+Description=J.A.R.V.I.S. Voice Assistant Web HUD
+Documentation=https://github.com/yesk993-ops/voice-assistant-linux
+After=network.target sound.target
+Wants=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=__INSTALL_DIR__
+ExecStart=__INSTALL_DIR__/venv/bin/python __INSTALL_DIR__/voice_assistant/web_server.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=PATH=__INSTALL_DIR__/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+
+[Install]
+WantedBy=default.target
