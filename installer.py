@@ -211,7 +211,11 @@ def setup_systemd_service():
 
 
 def main():
-    logger.info("=== J.A.R.V.I.S. SYSTEM CORE CONVERGENCE ===")
+    logger.info("============================================")
+    logger.info("   J.A.R.V.I.S. SYSTEM CONVERGENCE — v2.0") 
+    logger.info("   Hands-free voice: say \"Jarvis, cpu usage\"") 
+    logger.info("   Follow-up window: 10 seconds after response") 
+    logger.info("============================================\n")
     os_name = platform.system()
     logger.info(f"Target System Operating System detected: {os_name.upper()}")
 
@@ -285,7 +289,20 @@ def main():
     if os_name == "Linux":
         setup_systemd_service()
 
-    # Step 6: Boot J.A.R.V.I.S.!
+    # Step 6: Print service management instructions
+    if os_name == "Linux":
+        print()
+        logger.info("=== J.A.R.V.I.S. SYSTEMD SERVICE ===")
+        logger.info("INSTALLED! Manage with:")
+        logger.info("  systemctl --user start jarvis      # Start server")
+        logger.info("  systemctl --user stop jarvis       # Stop server")
+        logger.info("  systemctl --user restart jarvis    # Restart after pull")
+        logger.info("  systemctl --user enable jarvis     # Auto-start on login")
+        logger.info("  journalctl --user -u jarvis -f     # View live logs")
+        logger.info("==================================")
+        print()
+
+    # Step 7: Boot J.A.R.V.I.S.!
     logger.info("Setup complete! Initializing J.A.R.V.I.S. Core Web HUD...")
     server_path = os.path.join(INSTALLER_DIR, "voice_assistant", "web_server.py")
 

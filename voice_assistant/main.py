@@ -85,6 +85,20 @@ class VoiceAssistant:
         self.running = False
         self.wake_word_active = False
         self._pending_confirmation = None  # For destructive action confirmation
+        
+        # Conversational memory (Gemini-style follow-up context)
+        self.conversation_history = []  # Max 5 entries
+        self._last_intent = None
+        self._last_text = None
+        self._last_response = None
+        self._last_entities = {}
+        
+        # Conversational memory (Gemini-style follow-up context)
+        self.conversation_history: List[Dict[str, str]] = []  # Max 5 entries
+        self._last_intent: Optional[str] = None
+        self._last_text: Optional[str] = None
+        self._last_response: Optional[str] = None
+        self._last_entities: Dict[str, Any] = {}
 
         # Initialize logging
         self._setup_logging()
@@ -192,6 +206,45 @@ class VoiceAssistant:
     def _get_who_are_you_response(self) -> str:
         """Return a response to 'who are you'"""
         return "I'm J.A.R.V.I.S. — your voice assistant for Linux system control. I can check your system stats, manage files, control volume and brightness, launch applications, and more. Say 'help' to see everything I can do!"
+    
+    def _resolve_followup(self, text: str) -> str:
+        """Resolve follow-up queries against last conversation context"""
+        text_lower = text.lower()
+        prev_intent = self._last_intent or ""
+        
+        # If user says "and what about X" or "how about X"
+        topic_map = {
+            "cpu": "cpu usage", "processor": "cpu usage", "performance": "cpu usage",
+            "memory": "memory usage", "ram": "memory usage",
+            "disk": "disk usage", "storage": "disk usage", "drive": "disk usage", "space": "disk usage",
+            "battery": "battery", "power": "battery", "charge": "battery",
+            "temp": "temperature", "temperature": "temperature", "heat": "temperature", "hot": "temperature",
+            "network": "network info", "internet": "network info", "wifi": "network info", "ip": "network info",
+            "volume": "volume", "sound": "volume", "audio": "volume",
+            "brightness": "brightness", "screen": "brightness", "display": "brightness",
+            "process": "top processes", "program": "top processes", "running": "top processes",
+        }
+        
+        for keyword, mapped_text in topic_map.items():
+            if keyword in text_lower:
+                return mapped_text
+        
+        # Generic follow-up — user just said "and?" or "what else?" — return system summary
+        if any(w in text_lower for w in ["else", "more", "other", "another", "summary", "overview"]):
+            return "system summary"
+        
+        return ""
+    
+    def _update_conversation(self, text: str, intent: str, response: str):
+        """Update conversational memory with latest exchange"""
+        self._last_text = text
+        self._last_intent = intent
+        self._last_response = response
+        self.conversation_history.append({"role": "user", "text": text})
+        self.conversation_history.append({"role": "assistant", "text": response})
+        # Keep only last 5 exchanges (10 entries)
+        if len(self.conversation_history) > 10:
+            self.conversation_history = self.conversation_history[-10:]
     
     def _fallback_response(self, text: str) -> str:
         """When no intent matches, try keyword-based fallback to suggest what the user might want"""
@@ -355,16 +408,32 @@ class VoiceAssistant:
 
         # Handle confirmation responses for destructive actions
         if self._pending_confirmation:
-            return self._handle_confirmation(text)
+            result = self._handle_confirmation(text)
+            self._update_conversation(text, "confirmation", result)
+            return result
 
+        # Detect follow-up context (Gemini-style: "and what about memory?")
+        text_lower = text.lower().strip()
+        is_followup = any(w in text_lower for w in ["and", "what about", "how about", "what's", "how's", "tell me"])
+        has_topic = any(w in text_lower for w in ["cpu", "memory", "ram", "disk", "battery", "temp", "network", "process", "volume", "brightness"])
+        
         # Parse command
         command = self.parser.parse(text)
+
+        # If intent is unknown but we have context and this looks like a follow-up
+        if command.intent == "unknown" and self._last_intent and (is_followup or has_topic):
+            context_intent = self._resolve_followup(text_lower)
+            if context_intent:
+                logger.info(f"Follow-up detected: '{text}' -> {context_intent} (from previous: {self._last_intent})")
+                command = self.parser.parse(context_intent)
 
         if command.intent not in self.commands:
             fallback_msg = self._fallback_response(text)
             response = ResponseFormatter.info(fallback_msg)
             self.state = AssistantState.IDLE
-            return self._format_final_response(response, command.intent, text)
+            final_response = self._format_final_response(response, command.intent, text)
+            self._update_conversation(text, command.intent, final_response)
+            return final_response
 
         # Classify the query for appropriate response style
         response_type = QueryClassifier.classify(command.intent, text)
@@ -424,7 +493,12 @@ class VoiceAssistant:
             )
 
         self.state = AssistantState.IDLE
-        return self._format_final_response(response, command.intent, text)
+        final_response = self._format_final_response(response, command.intent, text)
+        
+        # Store in conversation memory
+        self._update_conversation(text, command.intent, final_response)
+        
+        return final_response
 
     def _handle_confirmation(self, text: str) -> str:
         """Handle user's confirmation response for destructive actions"""

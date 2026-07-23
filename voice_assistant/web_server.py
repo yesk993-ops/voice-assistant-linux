@@ -5,7 +5,11 @@ Serves a futuristic J.A.R.V.I.S. / Iron Man style Web UI and exposes REST APIs.
 
 import os
 import sys
+import io
 import logging
+import wave
+import base64
+import tempfile
 from flask import Flask, jsonify, request, render_template_string
 from pathlib import Path
 
@@ -621,7 +625,7 @@ HUD_HTML = """
         <!-- CLI Output / response display -->
         <div class="response-terminal" id="terminal-output">
             <div class="terminal-prompt">J.A.R.V.I.S. CORE v85.12 ONLINE</div>
-            <div class="terminal-text">Greetings, Sir. How may I assist you today? Try typing a command or clicking the Arc Reactor core to use your microphone.</div>
+            <div class="terminal-text">Greetings, Sir. Just say &quot;Jarvis&quot; followed by your command — like &quot;Jarvis, what's the CPU usage?&quot; I'll keep listening for 10 seconds after I respond so you can ask follow-ups.</div>
         </div>
     </div>
 
@@ -741,7 +745,7 @@ HUD_HTML = """
                     }
                 }
 
-                // Show interim feedback in the terminal area
+                // Show interim feedback
                 if (interimTranscript && !finalTranscript) {
                     showInterim(interimTranscript);
                 }
@@ -753,15 +757,36 @@ HUD_HTML = """
                         lastTranscriptTime = Date.now();
                         addLog('SPEECH', trimmed);
                         userInput.value = trimmed;
-                        showInterim('');  // Clear interim
+                        showInterim('');
                         
-                        // If J.A.R.V.I.S. is speaking, interrupt it — user is talking now
+                        // If J.A.R.V.I.S. is speaking, interrupt it
                         if (synth.speaking) {
                             synth.cancel();
                             setReactorState('idle');
                         }
                         
-                        sendCommand(trimmed);
+                        // Wake word filtering: only process if starts with "jarvis" or within 10s of last command
+                        const now = Date.now();
+                        const timeSinceLastCmd = now - (window._lastCommandTime || 0);
+                        const inFollowUpWindow = timeSinceLastCmd < 10000 && window._lastCommandTime;
+                        const hasWakeWord = trimmed.startsWith('jarvis') || trimmed.startsWith('hey jarvis') || trimmed.startsWith('ok jarvis');
+                        
+                        if (hasWakeWord) {
+                            // Strip wake word and process
+                            let cmd = trimmed.replace(/^(hey |ok )?jarvis[,.!?\s]*/i, '').trim();
+                            if (cmd) {
+                                sendCommand(cmd);
+                            } else {
+                                // Just "jarvis" — wake up and wait
+                                addSpeechTerminal('J.A.R.V.I.S.', 'Yes?');
+                            }
+                        } else if (inFollowUpWindow) {
+                            // In follow-up window, process without wake word
+                            sendCommand(trimmed);
+                        } else {
+                            // No wake word and not in follow-up — ignore (prevents false triggers)
+                            showInterim('(waiting for "jarvis"...)');
+                        }
                     }
                 }
             };
@@ -948,7 +973,10 @@ HUD_HTML = """
         // ── API Command ───────────────────────────────────────
         function sendCommand(cmdText) {
             if (!cmdText.trim()) return;
-            if (cmdText.length < 2) return;  // Ignore single chars
+            if (cmdText.length < 2) return;
+            
+            // Track command time for follow-up window
+            window._lastCommandTime = Date.now();
 
             addSpeechTerminal('USER', cmdText);
             addLog('API', 'POST COMMAND');
@@ -1022,7 +1050,11 @@ HUD_HTML = """
         updateStats();
         recognition = createRecognition();
         // Auto-start mic on page load (Gemini style — always ready)
-        setTimeout(() => startRecognition(), 500);
+        setTimeout(() => {
+    startRecognition();
+    addSpeechTerminal('J.A.R.V.I.S.', 'Say "Jarvis, cpu usage" or "Jarvis, help" to get started.');
+}, 500);
+console.log('J.A.R.V.I.S. HUD loaded — always listening for "jarvis"');
     </script>
 </body>
 </html>
@@ -1107,6 +1139,55 @@ def system_status():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/api/voice", methods=["POST"])
+def process_voice():
+    """Server-side speech recognition endpoint.
+    Accepts base64-encoded WAV audio from browser and runs Google STT.
+    This is a fallback when browser Web Speech API fails.
+    """
+    data = request.json or {}
+    audio_b64 = data.get("audio", "")
+    
+    if not audio_b64:
+        return jsonify({"message": "No audio data", "success": False}), 400
+    
+    try:
+        # Decode base64 audio
+        audio_bytes = base64.b64decode(audio_b64)
+        
+        # Use speech_recognition library to process
+        import speech_recognition as sr
+        recognizer = sr.Recognizer()
+        
+        # Write to temp file and read as AudioFile
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+            f.write(audio_bytes)
+            tmp_path = f.name
+        
+        try:
+            with sr.AudioFile(tmp_path) as source:
+                audio = recognizer.record(source)
+            text = recognizer.recognize_google(audio)
+            os.unlink(tmp_path)
+            
+            if text:
+                response_message = assistant.process_command(text)
+                return jsonify({
+                    "message": response_message,
+                    "spoken": response_message[:120] if len(response_message) > 120 else response_message,
+                    "transcript": text,
+                    "success": True
+                })
+        except Exception as e:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+            logger.warning(f"Voice recognition failed: {e}")
+            return jsonify({"message": f"Could not recognize speech", "success": False}), 400
+            
+    except Exception as e:
+        logger.error(f"Voice processing error: {e}")
+        return jsonify({"message": str(e), "success": False}), 500
 
 def run_server(port=5000):
     """Run server"""

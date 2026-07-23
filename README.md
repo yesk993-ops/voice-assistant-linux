@@ -1,4 +1,4 @@
-# 🛸 J.A.R.V.I.S. Voice Assistant & Sci-Fi HUD Interface
+# 🛸 J.A.R.V.I.S. Voice Assistant — Gemini-Style Hands-Free HUD
 > **The Ultimate Iron Man-Style System Assistant for Linux & Windows**
 
 Welcome to **J.A.R.V.I.S.** (Just A Rather Very Intelligent System), a production-grade, natural-language voice assistant that gives you complete command over your computer. It features an incredibly sleek, **Iron Man style holographic HUD Web UI** with real-time hardware telemetry and interactive audio visualizers!
@@ -14,6 +14,24 @@ Open your terminal and run this single-line command:
 ```bash
 curl -sSL "https://raw.githubusercontent.com/yesk993-ops/voice-assistant-linux/main/installer.py" | python3
 ```
+
+### 🎯 After installation — Systemd Service (run once):
+```bash
+systemctl --user start jarvis    # Start J.A.R.V.I.S. as a background service
+systemctl --user enable jarvis   # Auto-start on login
+```
+Then open **http://localhost:5000** — say **"Jarvis, what's the CPU usage?"**
+
+## 🎯 How Voice Mode Works (Hands-Free, Like Gemini)
+
+| Feature | How it works |
+|---------|-------------|
+| **Wake word** | Say **"Jarvis"** followed by your command — e.g. *"Jarvis, what's the CPU?"* |
+| **Follow-up window** | After J.A.R.V.I.S. responds, you have **10 seconds** to ask a follow-up without saying "Jarvis" |
+| **Always-on mic** | Mic activates automatically on page load — no buttons to press |
+| **Interrupt** | Speak while J.A.R.V.I.S. is talking and it stops to listen |
+| **Natural voice** | Uses Google/Microsoft voices with natural pitch and rate |
+| **Fallback** | If Web Speech fails, audio can be sent to the server for recognition via `/api/voice` |
 *Note: The installer automatically handles standard dependency installation, using `sudo` on your system package manager (`apt`, `dnf`, `pacman`, or `zypper`) as necessary.*
 
 ### 🪟 For Windows
