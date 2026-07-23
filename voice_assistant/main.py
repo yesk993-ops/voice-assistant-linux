@@ -38,6 +38,7 @@ from voice_assistant.modules.response_formatter import (
     ResponseFormatter, QueryClassifier, StructuredResponse,
     ResponseType, Verbosity
 )
+from voice_assistant.modules.ollama_chat import OllamaChat
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +165,13 @@ class VoiceAssistant:
             self.help = HelpSystem()
             self.parser = CommandParser()
 
+            # Initialize Ollama for open-ended conversation
+            self.ollama = OllamaChat()
+            if self.ollama.available:
+                logger.info(f"Ollama ({self.ollama.model}) available for open-ended chat!")
+            else:
+                logger.info("Ollama not available. Using hardcoded fallback.")
+            
             logger.info("All modules initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize modules: {e}")
@@ -247,11 +255,19 @@ class VoiceAssistant:
             self.conversation_history = self.conversation_history[-10:]
     
     def _fallback_response(self, text: str) -> str:
-        """When no intent matches, try keyword-based fallback to suggest what the user might want"""
+        """When no intent matches, try Ollama first, then keyword fallback."""
+        # Try Ollama for open-ended conversation
+        if hasattr(self, 'ollama') and self.ollama.available:
+            try:
+                llm_response = self.ollama.chat(text, self.conversation_history)
+                if llm_response and len(llm_response) > 3:
+                    return llm_response
+            except Exception as e:
+                logger.warning(f"Ollama fallback failed: {e}")
+        
+        # Hardcoded keyword fallback (when Ollama is not available)
         import random
         text_lower = text.lower()
-        
-        # Keyword matching for common topics
         hints = []
         
         if any(w in text_lower for w in ['cpu', 'processor', 'performance']):
@@ -284,7 +300,7 @@ class VoiceAssistant:
         if hints:
             return "Hmm, I'm not sure I understood that. " + hints[0]
         
-        # Completely unknown - suggest help
+        # Completely unknown - offer Ollama install or suggest help
         confused = [
             "I didn't quite catch that. Try saying 'help' to see what I can do, or just ask me something like 'what's the cpu usage?'",
             "Not sure what you mean. Say 'help' for a list of things I can do!",
@@ -610,6 +626,16 @@ class VoiceAssistant:
         self.running = False
         logger.info("Assistant stopped")
 
+    def get_ollama_status(self) -> Dict[str, Any]:
+        """Get Ollama availability status"""
+        if hasattr(self, 'ollama'):
+            return {
+                "available": self.ollama.available,
+                "model": self.ollama.model if self.ollama.available else None,
+                "install_hint": self.ollama.install_instructions() if not self.ollama.available else ""
+            }
+        return {"available": False}
+    
     def get_status(self) -> Dict[str, Any]:
         """Get assistant status"""
         return {

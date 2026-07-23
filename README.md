@@ -9,6 +9,25 @@ Welcome to **J.A.R.V.I.S.** (Just A Rather Very Intelligent System), a productio
 
 This assistant includes a **smart cross-platform installer** that automatically detects your Operating System and Linux flavor (Ubuntu, Debian, RHEL, Fedora, CentOS, Arch, OpenSUSE, or Windows), installs all required system libraries, sets up a clean virtual environment, installs packages, and boots up the J.A.R.V.I.S. Core Web Interface instantly!
 
+## 🧠 Unlimited Conversation (Bonus Feature)
+
+J.A.R.V.I.S. can talk about **anything** — not just system commands — by using **Ollama**, a free local AI:
+
+```bash
+# Install Ollama (one-time, 2 minutes):
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3.2:1b
+
+# Restart J.A.R.V.I.S.:
+systemctl --user restart jarvis
+```
+
+Now you can ask J.A.R.V.I.S. anything: *"What's the meaning of life?"*, *"Tell me a joke"*, *"What do you think about AI?"* — it responds like a real conversation, not just a command parser.
+
+> **No API keys needed. 100% offline and private. Works on any Linux machine with 4GB RAM.**
+
+---
+
 ### 🐧 For All Linux Flavors (Ubuntu, RHEL, Arch, Fedora, openSUSE, etc.)
 Open your terminal and run this single-line command:
 ```bash

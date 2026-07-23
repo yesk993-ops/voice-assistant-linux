@@ -119,6 +119,35 @@ You:    "how much disk space is left?"    ← Also works!
 Jarvis: "Storage at / is 69% used — still okay."
 ```
 
+### 🧠 Unlimited Conversation (With Ollama)
+
+By default, J.A.R.V.I.S. only understands system commands (CPU, memory, files, etc.).
+For **truly open-ended conversation** about ANY topic, install **Ollama** — a free, local AI:
+
+```bash
+# One-time setup (takes 2 minutes):
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3.2:1b
+systemctl --user restart jarvis
+```
+
+**After Ollama is installed, you can talk about ANYTHING:**
+
+| You say | Without Ollama | With Ollama |
+|---------|---------------|-------------|
+| *"Jarvis, what's the meaning of life?"* | ❌ *"I don't know that one..."* | ✅ *"42! Just kidding. I think it's about learning, growing, and helping others along the way."* |
+| *"Jarvis, tell me a fun fact"* | ❌ Unknown | ✅ *"Did you know that honey never spoils? Archaeologists found 3000-year-old honey in Egyptian tombs that's still edible!"* |
+| *"Jarvis, what do you think about AI?"* | ❌ Unknown | ✅ *"I think AI is fascinating — it's like giving computers a spark of creativity. We're just getting started!"* |
+| *"Jarvis, how was your day?"* | ❌ Unknown | ✅ *"Pretty quiet, just monitoring your system stats and waiting for you to ask me something interesting!"* |
+
+**Requirements for Ollama:**
+- Any Linux machine (works on 4GB RAM with `llama3.2:1b`)
+- ~1GB disk space for the model
+- No GPU required, no API keys, no internet after install
+- 100% private and offline
+
+Without Ollama, J.A.R.V.I.S. still works perfectly for all system commands.
+
 ### 🔇 Interrupting
 
 J.A.R.V.I.S. speaks back to you. If you want to interrupt and ask something else:

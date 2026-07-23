@@ -1052,7 +1052,15 @@ HUD_HTML = """
         // Auto-start mic on page load (Gemini style — always ready)
         setTimeout(() => {
     startRecognition();
-    addSpeechTerminal('J.A.R.V.I.S.', 'Say "Jarvis, cpu usage" or "Jarvis, help" to get started.');
+    // Check Ollama availability
+fetch('/api/ollama/status').then(r=>r.json()).then(s=>{
+    if(!s.available) {
+        addLog('OLLAMA', 'NOT AVAILABLE — install for open-ended chat');
+    } else {
+        addLog('OLLAMA', `READY (${s.model})`);
+    }
+}).catch(()=>{});
+addSpeechTerminal('J.A.R.V.I.S.', 'Say "Jarvis, cpu usage" or "Jarvis, what do you think about...?"');
 }, 500);
 console.log('J.A.R.V.I.S. HUD loaded — always listening for "jarvis"');
     </script>
@@ -1098,6 +1106,21 @@ def process_command():
             "message": f"Diagnostics failure: {str(e)}",
             "success": False
         }), 500
+
+@app.route("/api/ollama/status", methods=["GET"])
+def ollama_status():
+    """Check if Ollama is available for open-ended conversation."""
+    try:
+        status = assistant.get_ollama_status()
+        return jsonify(status)
+    except Exception as e:
+        return jsonify({"available": False, "error": str(e)})
+
+@app.route("/api/ollama/install", methods=["GET"])
+def ollama_install_guide():
+    """Get instructions to install Ollama."""
+    from voice_assistant.modules.ollama_chat import OllamaChat
+    return jsonify({"instructions": OllamaChat.install_instructions()})
 
 @app.route("/api/status", methods=["GET"])
 def system_status():

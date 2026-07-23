@@ -302,7 +302,19 @@ def main():
         logger.info("==================================")
         print()
 
-    # Step 7: Boot J.A.R.V.I.S.!
+    # Step 7: Optional Ollama setup (free, local LLM for unlimited conversation)
+    print()
+    logger.info("=== OPTIONAL: UNLIMITED CONVERSATION ===")
+    logger.info("J.A.R.V.I.S. can talk about ANYTHING with Ollama (free, local AI).")
+    logger.info("Without Ollama, only system commands are recognized.")
+    logger.info("Install Ollama anytime later with:")
+    logger.info("  curl -fsSL https://ollama.com/install.sh | sh")
+    logger.info("  ollama pull llama3.2:1b")
+    logger.info("  systemctl --user restart jarvis")
+    logger.info("============================================")
+    print()
+
+    # Step 8: Boot J.A.R.V.I.S.!
     logger.info("Setup complete! Initializing J.A.R.V.I.S. Core Web HUD...")
     server_path = os.path.join(INSTALLER_DIR, "voice_assistant", "web_server.py")
 
