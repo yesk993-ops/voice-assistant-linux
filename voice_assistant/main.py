@@ -193,6 +193,52 @@ class VoiceAssistant:
         """Return a response to 'who are you'"""
         return "I'm J.A.R.V.I.S. — your voice assistant for Linux system control. I can check your system stats, manage files, control volume and brightness, launch applications, and more. Say 'help' to see everything I can do!"
     
+    def _fallback_response(self, text: str) -> str:
+        """When no intent matches, try keyword-based fallback to suggest what the user might want"""
+        import random
+        text_lower = text.lower()
+        
+        # Keyword matching for common topics
+        hints = []
+        
+        if any(w in text_lower for w in ['cpu', 'processor', 'performance']):
+            hints.append("Try saying 'cpu usage' or 'how's the cpu?'")
+        elif any(w in text_lower for w in ['memory', 'ram']):
+            hints.append("Try saying 'memory usage' or 'how much ram is being used?'")
+        elif any(w in text_lower for w in ['disk', 'storage', 'drive', 'space']):
+            hints.append("Try saying 'disk usage' or 'how much space is left?'")
+        elif any(w in text_lower for w in ['battery', 'charge', 'power']):
+            hints.append("Try saying 'battery status' or 'how much battery is left?'")
+        elif any(w in text_lower for w in ['temperature', 'temp', 'hot']):
+            hints.append("Try saying 'temperature' or 'how hot is the system?'")
+        elif any(w in text_lower for w in ['network', 'internet', 'wifi', 'ip']):
+            hints.append("Try saying 'network info' or 'what's my ip?'")
+        elif any(w in text_lower for w in ['volume', 'sound', 'audio', 'speaker']):
+            hints.append("Try saying 'set volume to 50' or 'mute' or 'volume status'")
+        elif any(w in text_lower for w in ['brightness', 'screen', 'display']):
+            hints.append("Try saying 'set brightness to 70' or 'brightness status'")
+        elif any(w in text_lower for w in ['open', 'launch', 'start', 'run']):
+            hints.append("Try saying 'open firefox', 'open terminal', or 'open calculator'")
+        elif any(w in text_lower for w in ['close', 'quit', 'kill']):
+            hints.append("Try saying 'close firefox' or 'quit the app'")
+        elif any(w in text_lower for w in ['file', 'folder', 'directory', 'create', 'delete']):
+            hints.append("Try saying 'create file test.txt', 'list files', or 'delete file old.txt'")
+        elif any(w in text_lower for w in ['shutdown', 'reboot', 'restart', 'sleep']):
+            hints.append("Try saying 'shutdown', 'reboot', or 'suspend'")
+        elif any(w in text_lower for w in ['hello', 'hi', 'hey']):
+            return "Hey there! To ask me something, just say it directly — like 'cpu usage' or 'open browser'. Try saying 'help' to see what I can do!"
+        
+        if hints:
+            return "Hmm, I'm not sure I understood that. " + hints[0]
+        
+        # Completely unknown - suggest help
+        confused = [
+            "I didn't quite catch that. Try saying 'help' to see what I can do, or just ask me something like 'what's the cpu usage?'",
+            "Not sure what you mean. Say 'help' for a list of things I can do!",
+            "Hmm, I don't know that one yet. Try 'help' to see what commands I understand.",
+        ]
+        return random.choice(confused)
+    
     def _register_commands(self):
         """Register all voice commands with their handlers"""
         self.commands = {
@@ -315,9 +361,8 @@ class VoiceAssistant:
         command = self.parser.parse(text)
 
         if command.intent not in self.commands:
-            response = ResponseFormatter.info(
-                f"Hmm, I don't know that one yet. Try saying 'help' to see what I can do!"
-            )
+            fallback_msg = self._fallback_response(text)
+            response = ResponseFormatter.info(fallback_msg)
             self.state = AssistantState.IDLE
             return self._format_final_response(response, command.intent, text)
 

@@ -299,21 +299,28 @@ class CommandParser:
             
             # System Monitoring
             IntentType.GET_CPU_USAGE: [
-                {"pattern": r"\b(cpu|processor)\s+(usage|utilization|load)\b", "weight": 1.0},
+                {"pattern": r"\bcpu\b", "weight": 0.5},
+                {"pattern": r"\b(cpu|processor)\s+(usage|utilization|load|percentage)\b", "weight": 1.0},
                 {"pattern": r"\bhow('?s| is)\s+(the\s+)?cpu\b", "weight": 0.9},
+                {"pattern": r"\b(what'?s|what is)\s+(the\s+)?cpu\s+(usage|load|at)\b", "weight": 0.9},
             ],
             IntentType.GET_MEMORY_USAGE: [
-                {"pattern": r"\b(memory|ram)\s+(usage|utilization)\b", "weight": 1.0},
+                {"pattern": r"\b(memory|ram)\b", "weight": 0.5},
+                {"pattern": r"\b(memory|ram)\s+(usage|utilization|load|percentage)\b", "weight": 1.0},
                 {"pattern": r"\bhow('?s| is)\s+(the\s+)?(memory|ram)\b", "weight": 0.9},
+                {"pattern": r"\b(what'?s|what is)\s+(the\s+)?(memory|ram)\s+(usage|at)\b", "weight": 0.9},
             ],
             IntentType.GET_DISK_USAGE: [
-                {"pattern": r"\b(disk|storage)\s+(usage|space|free)\b", "weight": 1.0},
+                {"pattern": r"\b(disk|storage|drive)\b", "weight": 0.5},
+                {"pattern": r"\b(disk|storage|drive)\s+(usage|space|free)\b", "weight": 1.0},
             ],
             IntentType.GET_TEMPERATURE: [
                 {"pattern": r"\b(temperature|temp|heat)\b", "weight": 1.0},
             ],
             IntentType.GET_BATTERY: [
-                {"pattern": r"\b(battery|power)\b", "weight": 1.0},
+                {"pattern": r"\b(battery|power|charge)\b", "weight": 1.0},
+                {"pattern": r"\b(what'?s|what is)\s+(the\s+)?battery\s+(level|percentage|at)\b", "weight": 0.9},
+                {"pattern": r"\bhow\s+much\s+battery\s+(left|do|is)\b", "weight": 0.9},
             ],
             IntentType.GET_NETWORK_INFO: [
                 {"pattern": r"\b(network|internet|connection)\s+(info|status|speed)\b", "weight": 1.0},
@@ -324,13 +331,18 @@ class CommandParser:
                 {"pattern": r"\bwhat('?s| is)\s+running\b", "weight": 0.8},
             ],
             IntentType.SYSTEM_SUMMARY: [
-                {"pattern": r"\b(system\s+)?(summary|status|report|overview)\b", "weight": 1.0},
+                {"pattern": r"\b(system\s+)?(summary|status|report|overview|health|info|information)\b", "weight": 1.0},
+                {"pattern": r"\bhow\s+(is|are)\s+((the|my)\s+)?(system|computer|laptop|machine)\b", "weight": 0.9},
+                {"pattern": r"\b(what'?s|what is)\s+(the\s+)?system\s+(usage|status|at)\b", "weight": 0.9},
+                {"pattern": r"\bsystem\s+usage\b", "weight": 0.9},
+                {"pattern": r"\bgive me\s+(a\s+)?(system\s+)?(summary|status|overview)\b", "weight": 0.9},
             ],
             
             # Help
             IntentType.SHOW_HELP: [
                 {"pattern": r"\bhelp\b", "weight": 1.0},
                 {"pattern": r"\bhelp\s+(.+)\b", "weight": 1.0, "entities": ["topic"]},
+                {"pattern": r"\bwhat\s+can\s+(you|i)\s+do\b", "weight": 0.9},
             ],
             IntentType.SHOW_COMMAND_HELP: [
                 {"pattern": r"\bhelp\s+(?:command\s+)?(\w+)\b", "weight": 1.0, "entities": ["command"]},
@@ -347,19 +359,18 @@ class CommandParser:
             
             # Greetings / Chitchat
             IntentType.GREETING: [
-                {"pattern": r"\b(hello|hi|hey|good\s*(morning|afternoon|evening)|yo|sup|howdy|greetings)\b", "weight": 1.0},
+                {"pattern": r"^(hello|hi|hey|heyy|hey there|good\s*(morning|afternoon|evening)|yo|sup|howdy|greetings)\s*[,.!?]*$", "weight": 1.0},
             ],
             IntentType.HOW_ARE_YOU: [
-                {"pattern": r"\bhow\s+(are|'re|is)\s+(you|it\s+going)\b", "weight": 1.0},
-                {"pattern": r"\bhow('?s| is)\s+it\s+going\b", "weight": 1.0},
-                {"pattern": r"\b(what'?s|what is)\s+up\b", "weight": 0.9},
+                {"pattern": r"^how\s+(are|'re|is)\s+(you|it\s+going)\s*[,.!?]*$", "weight": 1.0},
+                {"pattern": r"^how('?s| is)\s+it\s+going\s*[,.!?]*$", "weight": 1.0},
             ],
             IntentType.THANKS: [
-                {"pattern": r"\b(thanks|thank you|thankyou|thx|ty|appreciate it)\b", "weight": 1.0},
+                {"pattern": r"^(thanks|thank you|thankyou|thx|ty|appreciate it)\s*[,.!?]*$", "weight": 1.0},
             ],
             IntentType.WHO_ARE_YOU: [
-                {"pattern": r"\b(who|what)\s+(are|is)\s+you\b", "weight": 1.0},
-                {"pattern": r"\btell\s+me\s+about\s+yourself\b", "weight": 1.0},
+                {"pattern": r"^(who|what)\s+(are|is)\s+you\s*[,.!?]*$", "weight": 1.0},
+                {"pattern": r"^tell\s+me\s+about\s+yourself\s*[,.!?]*$", "weight": 1.0},
             ],
         }
     
@@ -391,12 +402,21 @@ class CommandParser:
         text = text.lower().strip()
         
         # Remove wake word if present
-        wake_words = ["assistant", "hey assistant", "okay assistant", "computer"]
+        wake_words = ["jarvis", "hey jarvis", "ok jarvis", "assistant", "hey assistant", "okay assistant", "computer", "hey computer"]
         for ww in wake_words:
             if text.startswith(ww):
                 text = text[len(ww):].strip()
                 if text.startswith(","):
                     text = text[1:].strip()
+        
+        # If after stripping the wake word the text is empty/just punctuation, it's a greeting
+        if not text or all(c in " ,.!?:;" for c in text):
+            return ParsedCommand(
+                intent=IntentType.GREETING.value,
+                entities={},
+                raw_text=text,
+                confidence=0.9
+            )
         
         # Try each intent pattern
         best_match = None
