@@ -20,25 +20,34 @@ REPO_URL = "https://github.com/yesk993-ops/voice-assistant-linux.git"
 def get_project_root():
     """
     Determine the project root directory.
-    If the installer was piped via stdin (curl | python3), clone the repo first.
-    Otherwise, use the directory where this script lives (local checkout).
+    If the required project files (voice_assistant/web_server.py) don't exist
+    locally, clone the repository automatically. This handles both local
+    checkouts and curl | python3 execution.
     """
-    # Detect if running from stdin (piped script)
-    is_stdin = __file__ in ("-", "<stdin>", "", None) or not os.path.isfile(__file__)
+    # 1) Check if CWD is already inside a valid checkout
+    candidate = os.getcwd()
+    marker = os.path.join(candidate, "voice_assistant", "web_server.py")
+    if os.path.isfile(marker):
+        return candidate
 
-    if is_stdin:
-        # Running via curl | python3 — clone the repo
-        target_dir = os.path.join(os.getcwd(), "voice-assistant-linux")
-        if os.path.isdir(target_dir):
-            logger.info(f"Found existing clone at {target_dir}")
-        else:
-            logger.info(f"Cloning repository into {target_dir}...")
-            subprocess.run(["git", "clone", "--depth=1", REPO_URL, target_dir], check=True)
-            logger.info("Repository cloned successfully.")
-        return target_dir
+    # 2) Check the directory where this script file lives (local execution)
+    try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        marker = os.path.join(script_dir, "voice_assistant", "web_server.py")
+        if os.path.isfile(marker):
+            return script_dir
+    except Exception:
+        pass
+
+    # 3) Not inside a checkout — clone the repository
+    target_dir = os.path.join(os.getcwd(), "voice-assistant-linux")
+    if os.path.isdir(target_dir):
+        logger.info(f"Found existing clone at {target_dir}")
     else:
-        # Running from a local file — use the script's directory
-        return os.path.dirname(os.path.abspath(__file__))
+        logger.info(f"Cloning repository into {target_dir}...")
+        subprocess.run(["git", "clone", "--depth=1", REPO_URL, target_dir], check=True)
+        logger.info("Repository cloned successfully.")
+    return target_dir
 
 
 INSTALLER_DIR = get_project_root()
@@ -87,7 +96,6 @@ def install_linux_dependencies(distro):
     if distro == "debian":
         logger.info("Updating apt package lists...")
         run_command(["apt-get", "update"], sudo=True)
-        # Install build essentials, portaudio dev headers, and tools
         pkgs = [
             "python3-dev", "python3-pip", "python3-venv",
             "build-essential", "portaudio19-dev", "libasound2-dev", "libpulse-dev",
@@ -97,7 +105,6 @@ def install_linux_dependencies(distro):
         return run_command(["apt-get", "install", "-y"] + pkgs, sudo=True)
 
     elif distro == "rhel":
-        # Group install development tools and headers
         logger.info("Installing development tools and EPEL if needed...")
         run_command(["dnf", "install", "-y", "epel-release"], sudo=True)
         pkgs = [
@@ -132,7 +139,6 @@ def setup_config_file():
     """Ensure a default config.env exists"""
     from pathlib import Path
     config_dir = Path(INSTALLER_DIR) / "config"
-
     config_dir.mkdir(exist_ok=True)
     config_file = config_dir / "config.env"
 
@@ -204,7 +210,6 @@ def main():
     subprocess.run([pip_path, "install", "--upgrade", "pip"], check=True)
 
     logger.info("Installing core Python packages inside venv...")
-    # Read requirements
     reqs_path = os.path.join(INSTALLER_DIR, "voice_assistant", "requirements.txt")
     if os.path.exists(reqs_path):
         subprocess.run([pip_path, "install", "-r", reqs_path], check=True)
@@ -223,7 +228,6 @@ def main():
     server_path = os.path.join(INSTALLER_DIR, "voice_assistant", "web_server.py")
 
     try:
-        # Start server and let it run
         subprocess.run([python_path, server_path])
     except KeyboardInterrupt:
         logger.info("J.A.R.V.I.S. server shut down by user request.")
