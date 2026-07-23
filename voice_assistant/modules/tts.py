@@ -123,6 +123,9 @@ class TextToSpeech:
         text = text.strip()
         logger.debug(f"Speaking: {text[:100]}...")
         
+        # Clean terminal output of the assistant's speech
+        print(f"\n[Assistant]: {text}")
+        
         with self._lock:
             try:
                 if self.engine_name == "pyttsx3":

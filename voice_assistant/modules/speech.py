@@ -29,8 +29,12 @@ class SpeechRecognizer:
         self.recognizer.dynamic_energy_threshold = self.dynamic_energy_threshold
         self.recognizer.pause_threshold = 0.8
         
-        self.microphone = sr.Microphone()
-        self._calibrate_microphone()
+        self.microphone = None
+        try:
+            self.microphone = sr.Microphone()
+            self._calibrate_microphone()
+        except Exception as e:
+            logger.warning(f"Microphone initialization failed (PyAudio may be missing or no microphone connected): {e}")
         
         logger.info(f"Speech recognizer initialized with engine: {engine}")
     
@@ -48,6 +52,22 @@ class SpeechRecognizer:
         """Listen for speech and return recognized text"""
         timeout = timeout or self.timeout
         phrase_time_limit = phrase_time_limit or self.phrase_time_limit
+        
+        if not self.microphone:
+            try:
+                import sys
+                import select
+                print("\n[No microphone] Enter command manually: ", end="", flush=True)
+                r, _, _ = select.select([sys.stdin], [], [], timeout or 5)
+                if r:
+                    line = sys.stdin.readline().strip()
+                    if line:
+                        logger.info(f"Terminal input: {line}")
+                        return line.lower().strip()
+                return None
+            except Exception as e:
+                logger.error(f"Fallback terminal input error: {e}")
+                return None
         
         try:
             with self.microphone as source:

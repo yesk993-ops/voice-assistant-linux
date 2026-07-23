@@ -230,6 +230,9 @@ class QueryClassifier:
         """Classify a command intent into response type"""
         text_lower = text.lower()
         
+        if "help" in intent.lower() or "tutorial" in intent.lower():
+            return ResponseType.HELP
+            
         if any(kw in intent.lower() for kw in ["shutdown", "reboot", "suspend", "hibernate", "logout"]):
             return ResponseType.DESTRUCTIVE
         if any(kw in intent.lower() for kw in ["delete_file", "delete_directory", "remove"]):
@@ -239,9 +242,6 @@ class QueryClassifier:
             return ResponseType.STATUS
         if any(kw in text_lower for kw in QueryClassifier.STATUS_PATTERNS):
             return ResponseType.STATUS
-        
-        if "help" in intent.lower() or "tutorial" in intent.lower():
-            return ResponseType.HELP
         
         if any(kw in intent.lower() for kw in ["summary", "system_summary"]):
             return ResponseType.SYSTEM_INFO

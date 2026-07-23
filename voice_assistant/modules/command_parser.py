@@ -324,7 +324,7 @@ class CommandParser:
             # Help
             IntentType.SHOW_HELP: [
                 {"pattern": r"\bhelp\b", "weight": 1.0},
-                {"pattern": r"\bhelp\s+(\w+)\b", "weight": 1.0, "entities": ["topic"]},
+                {"pattern": r"\bhelp\s+(.+)\b", "weight": 1.0, "entities": ["topic"]},
             ],
             IntentType.SHOW_COMMAND_HELP: [
                 {"pattern": r"\bhelp\s+(?:command\s+)?(\w+)\b", "weight": 1.0, "entities": ["command"]},

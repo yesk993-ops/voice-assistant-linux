@@ -217,15 +217,23 @@ class PowerManager:
         """Test power commands (dry run)"""
         try:
             # Test if commands exist
-            commands_to_test = [
-                ("systemctl", ["systemctl", "--version"]),
-                ("shutdown", ["shutdown", "--version"]),
-            ]
+            import shutil
+            commands_to_test = ["systemctl", "shutdown"]
             
-            for name, cmd in commands_to_test:
-                result = subprocess.run(cmd, capture_output=True)
-                if result.returncode != 0:
-                    logger.warning(f"{name} command not available")
+            for name in commands_to_test:
+                path = shutil.which(name)
+                if not path:
+                    # Check common sbin paths
+                    for extra_path in ["/sbin", "/usr/sbin"]:
+                        full_path = os.path.join(extra_path, name)
+                        if os.path.exists(full_path):
+                            path = full_path
+                            break
+                
+                if path:
+                    logger.info(f"{name} command found at: {path}")
+                else:
+                    logger.warning(f"{name} command not found in PATH")
             
             logger.info("Power manager test completed")
             return True
