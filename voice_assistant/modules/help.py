@@ -763,7 +763,7 @@ Say "tutorial" anytime to restart this guide!
         if not results:
             return f"No help topics found for '{query}'"
         
-        results.sort(reverse=True)
+        results.sort(key=lambda x: x[0], reverse=True)
         lines = [f"Search results for '{query}':"]
         for score, topic in results[:10]:
             lines.append(f"  • {topic.title} (help {topic.id}) - {topic.description}")

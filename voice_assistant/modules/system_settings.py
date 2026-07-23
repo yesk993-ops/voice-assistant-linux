@@ -8,6 +8,7 @@ import logging
 import subprocess
 import json
 from typing import List, Dict, Optional, Tuple
+from pathlib import Path
 import screen_brightness_control as sbc
 
 logger = logging.getLogger(__name__)

@@ -9,6 +9,7 @@ import subprocess
 import time
 import shlex
 from typing import Dict, List, Optional, Any
+from pathlib import Path
 import psutil
 
 logger = logging.getLogger(__name__)
@@ -208,7 +209,8 @@ class SystemCommandsManager:
                 return f"Shutdown scheduled: {content}"
             
             # Alternative: check shutdown_file = Path("/run/nologin")
-            if _file.exists():
+            nologin_file = Path("/run/nologin")
+            if nologin_file.exists():
                 return "Shutdown scheduled (nologin file exists)"
             
             return "No shutdown scheduled"

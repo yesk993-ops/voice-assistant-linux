@@ -1,0 +1,215 @@
+2026-07-23 06:47:09,701 - modules.speech - WARNING - Microphone initialization failed (PyAudio may be missing or no microphone connected): Could not find PyAudio; check installation
+2026-07-23 06:47:09,701 - modules.speech - INFO - Speech recognizer initialized with engine: google
+2026-07-23 06:47:09,708 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:47:09,708 - modules.tts - INFO - TTS initialized with engine: pyttsx3, rate: 180, volume: 1.0
+2026-07-23 06:47:09,708 - modules.power - INFO - PowerManager initialized for unknown
+2026-07-23 06:47:09,709 - modules.apps - INFO - ApplicationLauncher initialized
+2026-07-23 06:47:09,710 - modules.files - INFO - FileSystemManager initialized with base path: /home/user
+2026-07-23 06:47:09,710 - modules.system_settings - INFO - SystemSettingsManager initialized
+2026-07-23 06:47:09,710 - modules.system_commands - INFO - SystemCommandsManager initialized
+2026-07-23 06:47:09,710 - modules.system_monitor - INFO - SystemMonitor initialized
+2026-07-23 06:47:09,710 - modules.help - INFO - HelpSystem initialized
+2026-07-23 06:47:09,710 - modules.command_parser - INFO - CommandParser initialized
+2026-07-23 06:47:09,710 - __main__ - INFO - All modules initialized successfully
+2026-07-23 06:47:09,710 - __main__ - INFO - Voice Assistant initialized successfully
+2026-07-23 06:47:09,710 - __main__ - INFO - Running module tests...
+2026-07-23 06:47:09,710 - modules.speech - INFO - Testing speech recognition... Say something!
+2026-07-23 06:47:09,710 - modules.speech - WARNING - Test failed: No speech recognized
+2026-07-23 06:47:09,710 - __main__ - INFO - Speech Recognition: FAIL
+2026-07-23 06:47:09,710 - modules.tts - INFO - Testing TTS...
+2026-07-23 06:47:09,711 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:47:09,711 - __main__ - INFO - Text-to-Speech: PASS
+2026-07-23 06:47:09,716 - modules.power - ERROR - Power manager test failed: [Errno 2] No such file or directory: 'shutdown'
+2026-07-23 06:47:09,716 - __main__ - INFO - Power Manager: FAIL
+2026-07-23 06:47:09,716 - modules.apps - WARNING - browser: firefox - NOT FOUND
+2026-07-23 06:47:09,716 - modules.apps - WARNING - terminal: gnome-terminal - NOT FOUND
+2026-07-23 06:47:09,716 - modules.apps - WARNING - file_manager: nautilus - NOT FOUND
+2026-07-23 06:47:09,716 - modules.apps - WARNING - text_editor: gedit - NOT FOUND
+2026-07-23 06:47:09,717 - modules.apps - WARNING - code_editor: code - NOT FOUND
+2026-07-23 06:47:09,717 - __main__ - INFO - App Launcher: PASS
+2026-07-23 06:47:09,717 - modules.files - INFO - File system test passed
+2026-07-23 06:47:09,717 - __main__ - INFO - File System: PASS
+2026-07-23 06:47:09,717 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.SysFiles'> - FileNotFoundError: [Errno 2] No such file or directory: '/sys/class/backlight'
+2026-07-23 06:47:09,718 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.DDCUtil'> - FileNotFoundError: [Errno 2] No such file or directory: 'ddcutil'
+2026-07-23 06:47:10,119 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.SysFiles'> - FileNotFoundError: [Errno 2] No such file or directory: '/sys/class/backlight'
+2026-07-23 06:47:10,120 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.DDCUtil'> - FileNotFoundError: [Errno 2] No such file or directory: 'ddcutil'
+2026-07-23 06:47:10,520 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.SysFiles'> - FileNotFoundError: [Errno 2] No such file or directory: '/sys/class/backlight'
+2026-07-23 06:47:10,521 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.DDCUtil'> - FileNotFoundError: [Errno 2] No such file or directory: 'ddcutil'
+2026-07-23 06:47:10,923 - modules.system_settings - ERROR - Get volume error: [Errno 2] No such file or directory: 'pactl'
+2026-07-23 06:47:10,924 - modules.system_settings - INFO - System settings test passed
+2026-07-23 06:47:10,924 - __main__ - INFO - System Settings: PASS
+2026-07-23 06:47:10,924 - modules.system_commands - INFO - Running command: echo test
+2026-07-23 06:47:10,926 - modules.system_commands - INFO - System commands test passed
+2026-07-23 06:47:10,926 - __main__ - INFO - System Commands: PASS
+2026-07-23 06:47:11,040 - modules.system_monitor - INFO - System monitor test passed
+2026-07-23 06:47:11,040 - __main__ - INFO - System Monitor: PASS
+2026-07-23 06:47:11,040 - modules.help - ERROR - Help system test failed: '<' not supported between instances of 'HelpTopic' and 'HelpTopic'
+2026-07-23 06:47:11,040 - __main__ - INFO - Help System: FAIL
+2026-07-23 06:47:11,049 - modules.command_parser - INFO - Command parser test: 30/30 passed
+2026-07-23 06:47:11,050 - __main__ - INFO - Command Parser: PASS
+2026-07-23 06:47:11,050 - __main__ - ERROR - Response formatter test failed: 
+2026-07-23 06:47:11,050 - __main__ - INFO - Response Formatter: FAIL
+2026-07-23 06:48:19,894 - modules.speech - WARNING - Microphone initialization failed (PyAudio may be missing or no microphone connected): Could not find PyAudio; check installation
+2026-07-23 06:48:19,894 - modules.speech - INFO - Speech recognizer initialized with engine: google
+2026-07-23 06:48:19,897 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:48:19,897 - modules.tts - INFO - TTS initialized with engine: pyttsx3, rate: 180, volume: 1.0
+2026-07-23 06:48:19,897 - modules.power - INFO - PowerManager initialized for unknown
+2026-07-23 06:48:19,897 - modules.apps - INFO - ApplicationLauncher initialized
+2026-07-23 06:48:19,897 - modules.files - INFO - FileSystemManager initialized with base path: /home/user
+2026-07-23 06:48:19,898 - modules.system_settings - INFO - SystemSettingsManager initialized
+2026-07-23 06:48:19,898 - modules.system_commands - INFO - SystemCommandsManager initialized
+2026-07-23 06:48:19,898 - modules.system_monitor - INFO - SystemMonitor initialized
+2026-07-23 06:48:19,898 - modules.help - INFO - HelpSystem initialized
+2026-07-23 06:48:19,899 - modules.command_parser - INFO - CommandParser initialized
+2026-07-23 06:48:19,899 - __main__ - INFO - All modules initialized successfully
+2026-07-23 06:48:19,899 - __main__ - INFO - Voice Assistant initialized successfully
+2026-07-23 06:48:19,899 - __main__ - INFO - Running module tests...
+2026-07-23 06:48:19,899 - modules.speech - INFO - Testing speech recognition... Say something!
+2026-07-23 06:48:19,899 - modules.speech - WARNING - Test failed: No speech recognized
+2026-07-23 06:48:19,899 - __main__ - INFO - Speech Recognition: FAIL
+2026-07-23 06:48:19,899 - modules.tts - INFO - Testing TTS...
+2026-07-23 06:48:19,900 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:48:19,900 - __main__ - INFO - Text-to-Speech: PASS
+2026-07-23 06:48:19,900 - modules.power - INFO - systemctl command found at: /usr/bin/systemctl
+2026-07-23 06:48:19,901 - modules.power - INFO - shutdown command found at: /sbin/shutdown
+2026-07-23 06:48:19,901 - modules.power - INFO - Power manager test completed
+2026-07-23 06:48:19,901 - __main__ - INFO - Power Manager: PASS
+2026-07-23 06:48:19,901 - modules.apps - WARNING - browser: firefox - NOT FOUND
+2026-07-23 06:48:19,902 - modules.apps - WARNING - terminal: gnome-terminal - NOT FOUND
+2026-07-23 06:48:19,902 - modules.apps - WARNING - file_manager: nautilus - NOT FOUND
+2026-07-23 06:48:19,902 - modules.apps - WARNING - text_editor: gedit - NOT FOUND
+2026-07-23 06:48:19,903 - modules.apps - WARNING - code_editor: code - NOT FOUND
+2026-07-23 06:48:19,903 - __main__ - INFO - App Launcher: PASS
+2026-07-23 06:48:19,903 - modules.files - INFO - File system test passed
+2026-07-23 06:48:19,903 - __main__ - INFO - File System: PASS
+2026-07-23 06:48:19,903 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.SysFiles'> - FileNotFoundError: [Errno 2] No such file or directory: '/sys/class/backlight'
+2026-07-23 06:48:19,905 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.DDCUtil'> - FileNotFoundError: [Errno 2] No such file or directory: 'ddcutil'
+2026-07-23 06:48:20,305 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.SysFiles'> - FileNotFoundError: [Errno 2] No such file or directory: '/sys/class/backlight'
+2026-07-23 06:48:20,306 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.DDCUtil'> - FileNotFoundError: [Errno 2] No such file or directory: 'ddcutil'
+2026-07-23 06:48:20,707 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.SysFiles'> - FileNotFoundError: [Errno 2] No such file or directory: '/sys/class/backlight'
+2026-07-23 06:48:20,708 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.DDCUtil'> - FileNotFoundError: [Errno 2] No such file or directory: 'ddcutil'
+2026-07-23 06:48:21,109 - modules.system_settings - ERROR - Get volume error: [Errno 2] No such file or directory: 'pactl'
+2026-07-23 06:48:21,110 - modules.system_settings - INFO - System settings test passed
+2026-07-23 06:48:21,110 - __main__ - INFO - System Settings: PASS
+2026-07-23 06:48:21,110 - modules.system_commands - INFO - Running command: echo test
+2026-07-23 06:48:21,112 - modules.system_commands - INFO - System commands test passed
+2026-07-23 06:48:21,112 - __main__ - INFO - System Commands: PASS
+2026-07-23 06:48:21,224 - modules.system_monitor - INFO - System monitor test passed
+2026-07-23 06:48:21,224 - __main__ - INFO - System Monitor: PASS
+2026-07-23 06:48:21,224 - modules.help - INFO - Help system test passed
+2026-07-23 06:48:21,224 - __main__ - INFO - Help System: PASS
+2026-07-23 06:48:21,233 - modules.command_parser - INFO - Command parser test: 30/30 passed
+2026-07-23 06:48:21,234 - __main__ - INFO - Command Parser: PASS
+2026-07-23 06:48:21,234 - __main__ - INFO - Response formatter test passed
+2026-07-23 06:48:21,234 - __main__ - INFO - Response Formatter: PASS
+2026-07-23 06:48:24,791 - modules.speech - WARNING - Microphone initialization failed (PyAudio may be missing or no microphone connected): Could not find PyAudio; check installation
+2026-07-23 06:48:24,791 - modules.speech - INFO - Speech recognizer initialized with engine: google
+2026-07-23 06:48:24,795 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:48:24,796 - modules.tts - INFO - TTS initialized with engine: pyttsx3, rate: 180, volume: 1.0
+2026-07-23 06:48:24,796 - modules.power - INFO - PowerManager initialized for unknown
+2026-07-23 06:48:24,796 - modules.apps - INFO - ApplicationLauncher initialized
+2026-07-23 06:48:24,796 - modules.files - INFO - FileSystemManager initialized with base path: /home/user
+2026-07-23 06:48:24,796 - modules.system_settings - INFO - SystemSettingsManager initialized
+2026-07-23 06:48:24,796 - modules.system_commands - INFO - SystemCommandsManager initialized
+2026-07-23 06:48:24,796 - modules.system_monitor - INFO - SystemMonitor initialized
+2026-07-23 06:48:24,796 - modules.help - INFO - HelpSystem initialized
+2026-07-23 06:48:24,797 - modules.command_parser - INFO - CommandParser initialized
+2026-07-23 06:48:24,797 - __main__ - INFO - All modules initialized successfully
+2026-07-23 06:48:24,797 - __main__ - INFO - Voice Assistant initialized successfully
+2026-07-23 06:48:24,797 - __main__ - INFO - Listening...
+2026-07-23 06:48:24,797 - modules.speech - INFO - Terminal input: system summary
+2026-07-23 06:48:24,797 - __main__ - INFO - Processing: system summary
+2026-07-23 06:48:25,332 - __main__ - INFO - TTS suppressed for long response (207 chars)
+2026-07-23 06:48:25,332 - __main__ - INFO - TTS suppressed long text (207 chars). Speaking: ================================================== SYSTEM SUMMARY...
+2026-07-23 06:48:25,334 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:48:27,967 - modules.speech - WARNING - Microphone initialization failed (PyAudio may be missing or no microphone connected): Could not find PyAudio; check installation
+2026-07-23 06:48:27,968 - modules.speech - INFO - Speech recognizer initialized with engine: google
+2026-07-23 06:48:27,971 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:48:27,971 - modules.tts - INFO - TTS initialized with engine: pyttsx3, rate: 180, volume: 1.0
+2026-07-23 06:48:27,971 - modules.power - INFO - PowerManager initialized for unknown
+2026-07-23 06:48:27,971 - modules.apps - INFO - ApplicationLauncher initialized
+2026-07-23 06:48:27,971 - modules.files - INFO - FileSystemManager initialized with base path: /home/user
+2026-07-23 06:48:27,972 - modules.system_settings - INFO - SystemSettingsManager initialized
+2026-07-23 06:48:27,972 - modules.system_commands - INFO - SystemCommandsManager initialized
+2026-07-23 06:48:27,972 - modules.system_monitor - INFO - SystemMonitor initialized
+2026-07-23 06:48:27,972 - modules.help - INFO - HelpSystem initialized
+2026-07-23 06:48:27,972 - modules.command_parser - INFO - CommandParser initialized
+2026-07-23 06:48:27,972 - __main__ - INFO - All modules initialized successfully
+2026-07-23 06:48:27,972 - __main__ - INFO - Voice Assistant initialized successfully
+2026-07-23 06:48:27,972 - __main__ - INFO - Listening...
+2026-07-23 06:48:27,972 - modules.speech - INFO - Terminal input: cpu usage
+2026-07-23 06:48:27,972 - __main__ - INFO - Processing: cpu usage
+2026-07-23 06:48:28,980 - __main__ - INFO - Speaking: CPU Usage: 0....
+2026-07-23 06:48:28,981 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:48:31,876 - modules.speech - WARNING - Microphone initialization failed (PyAudio may be missing or no microphone connected): Could not find PyAudio; check installation
+2026-07-23 06:48:31,876 - modules.speech - INFO - Speech recognizer initialized with engine: google
+2026-07-23 06:48:31,878 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:48:31,878 - modules.tts - INFO - TTS initialized with engine: pyttsx3, rate: 180, volume: 1.0
+2026-07-23 06:48:31,878 - modules.power - INFO - PowerManager initialized for unknown
+2026-07-23 06:48:31,879 - modules.apps - INFO - ApplicationLauncher initialized
+2026-07-23 06:48:31,879 - modules.files - INFO - FileSystemManager initialized with base path: /home/user
+2026-07-23 06:48:31,879 - modules.system_settings - INFO - SystemSettingsManager initialized
+2026-07-23 06:48:31,879 - modules.system_commands - INFO - SystemCommandsManager initialized
+2026-07-23 06:48:31,879 - modules.system_monitor - INFO - SystemMonitor initialized
+2026-07-23 06:48:31,879 - modules.help - INFO - HelpSystem initialized
+2026-07-23 06:48:31,879 - modules.command_parser - INFO - CommandParser initialized
+2026-07-23 06:48:31,879 - __main__ - INFO - All modules initialized successfully
+2026-07-23 06:48:31,879 - __main__ - INFO - Voice Assistant initialized successfully
+2026-07-23 06:48:31,879 - __main__ - INFO - Listening...
+2026-07-23 06:48:31,879 - modules.speech - INFO - Terminal input: help power management
+2026-07-23 06:48:31,879 - __main__ - INFO - Processing: help power management
+2026-07-23 06:48:31,886 - __main__ - INFO - Speaking: No battery detected...
+2026-07-23 06:48:31,887 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:55:37,244 - modules.speech - WARNING - Microphone initialization failed (PyAudio may be missing or no microphone connected): Could not find PyAudio; check installation
+2026-07-23 06:55:37,244 - modules.speech - INFO - Speech recognizer initialized with engine: google
+2026-07-23 06:55:37,246 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:55:37,246 - modules.tts - INFO - TTS initialized with engine: pyttsx3, rate: 180, volume: 1.0
+2026-07-23 06:55:37,247 - modules.power - INFO - PowerManager initialized for unknown
+2026-07-23 06:55:37,247 - modules.apps - INFO - ApplicationLauncher initialized
+2026-07-23 06:55:37,247 - modules.files - INFO - FileSystemManager initialized with base path: /home/user
+2026-07-23 06:55:37,247 - modules.system_settings - INFO - SystemSettingsManager initialized
+2026-07-23 06:55:37,247 - modules.system_commands - INFO - SystemCommandsManager initialized
+2026-07-23 06:55:37,248 - modules.system_monitor - INFO - SystemMonitor initialized
+2026-07-23 06:55:37,248 - modules.help - INFO - HelpSystem initialized
+2026-07-23 06:55:37,248 - modules.command_parser - INFO - CommandParser initialized
+2026-07-23 06:55:37,248 - __main__ - INFO - All modules initialized successfully
+2026-07-23 06:55:37,248 - __main__ - INFO - Voice Assistant initialized successfully
+2026-07-23 06:55:37,248 - __main__ - INFO - Running module tests...
+2026-07-23 06:55:37,248 - modules.speech - INFO - Testing speech recognition... Say something!
+2026-07-23 06:55:37,248 - modules.speech - WARNING - Test failed: No speech recognized
+2026-07-23 06:55:37,249 - __main__ - INFO - Speech Recognition: FAIL
+2026-07-23 06:55:37,249 - modules.tts - INFO - Testing TTS...
+2026-07-23 06:55:37,249 - modules.tts - ERROR - Failed to initialize pyttsx3: This means you probably do not have eSpeak or eSpeak-ng installed!
+2026-07-23 06:55:37,250 - __main__ - INFO - Text-to-Speech: PASS
+2026-07-23 06:55:37,250 - modules.power - INFO - systemctl command found at: /usr/bin/systemctl
+2026-07-23 06:55:37,250 - modules.power - INFO - shutdown command found at: /sbin/shutdown
+2026-07-23 06:55:37,250 - modules.power - INFO - Power manager test completed
+2026-07-23 06:55:37,250 - __main__ - INFO - Power Manager: PASS
+2026-07-23 06:55:37,250 - modules.apps - WARNING - browser: firefox - NOT FOUND
+2026-07-23 06:55:37,250 - modules.apps - WARNING - terminal: gnome-terminal - NOT FOUND
+2026-07-23 06:55:37,250 - modules.apps - WARNING - file_manager: nautilus - NOT FOUND
+2026-07-23 06:55:37,250 - modules.apps - WARNING - text_editor: gedit - NOT FOUND
+2026-07-23 06:55:37,250 - modules.apps - WARNING - code_editor: code - NOT FOUND
+2026-07-23 06:55:37,250 - __main__ - INFO - App Launcher: PASS
+2026-07-23 06:55:37,251 - modules.files - INFO - File system test passed
+2026-07-23 06:55:37,251 - __main__ - INFO - File System: PASS
+2026-07-23 06:55:37,251 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.SysFiles'> - FileNotFoundError: [Errno 2] No such file or directory: '/sys/class/backlight'
+2026-07-23 06:55:37,252 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.DDCUtil'> - FileNotFoundError: [Errno 2] No such file or directory: 'ddcutil'
+2026-07-23 06:55:37,652 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.SysFiles'> - FileNotFoundError: [Errno 2] No such file or directory: '/sys/class/backlight'
+2026-07-23 06:55:37,654 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.DDCUtil'> - FileNotFoundError: [Errno 2] No such file or directory: 'ddcutil'
+2026-07-23 06:55:38,054 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.SysFiles'> - FileNotFoundError: [Errno 2] No such file or directory: '/sys/class/backlight'
+2026-07-23 06:55:38,055 - screen_brightness_control.linux - WARNING - error grabbing display info from <class 'screen_brightness_control.linux.DDCUtil'> - FileNotFoundError: [Errno 2] No such file or directory: 'ddcutil'
+2026-07-23 06:55:38,456 - modules.system_settings - ERROR - Get volume error: [Errno 2] No such file or directory: 'pactl'
+2026-07-23 06:55:38,456 - modules.system_settings - INFO - System settings test passed
+2026-07-23 06:55:38,456 - __main__ - INFO - System Settings: PASS
+2026-07-23 06:55:38,456 - modules.system_commands - INFO - Running command: echo test
+2026-07-23 06:55:38,458 - modules.system_commands - INFO - System commands test passed
+2026-07-23 06:55:38,458 - __main__ - INFO - System Commands: PASS
+2026-07-23 06:55:38,576 - modules.system_monitor - INFO - System monitor test passed
+2026-07-23 06:55:38,577 - __main__ - INFO - System Monitor: PASS
+2026-07-23 06:55:38,577 - modules.help - INFO - Help system test passed
+2026-07-23 06:55:38,577 - __main__ - INFO - Help System: PASS
+2026-07-23 06:55:38,593 - modules.command_parser - INFO - Command parser test: 30/30 passed
+2026-07-23 06:55:38,593 - __main__ - INFO - Command Parser: PASS
+2026-07-23 06:55:38,593 - __main__ - INFO - Response formatter test passed
+2026-07-23 06:55:38,593 - __main__ - INFO - Response Formatter: PASS

@@ -19,7 +19,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import modules
-from modules.speech import SpeechRecognizer, TextToSpeech
+from modules.speech import SpeechRecognizer
+from modules.tts import TextToSpeech
 from modules.power import PowerManager
 from modules.apps import ApplicationLauncher
 from modules.files import FileSystemManager
@@ -178,6 +179,10 @@ class VoiceAssistant:
             "list_directory": self.files.list_directory,
             "search_files": self.files.search_files,
             "read_file": self.files.read_file,
+            "write_file": self.files.write_file,
+            "change_directory": self.files.change_directory,
+            "get_file_info": self.files.get_file_info,
+            "find_large_files": self.files.find_large_files,
             
             # System Settings
             "set_brightness": self.settings.set_brightness,
