@@ -83,6 +83,12 @@ class IntentType(Enum):
     GET_PROCESSES = "get_processes"
     SYSTEM_SUMMARY = "system_summary"
     
+    # Greetings / Chitchat
+    GREETING = "greeting"
+    HOW_ARE_YOU = "how_are_you"
+    THANKS = "thanks"
+    WHO_ARE_YOU = "who_are_you"
+    
     # Help
     SHOW_HELP = "show_help"
     SHOW_COMMAND_HELP = "show_command_help"
@@ -337,6 +343,23 @@ class CommandParser:
             ],
             IntentType.SEARCH_HELP: [
                 {"pattern": r"\b(search|find)\s+help\s+(?:for\s+)?(\w+)\b", "weight": 1.0, "entities": ["query"]},
+            ],
+            
+            # Greetings / Chitchat
+            IntentType.GREETING: [
+                {"pattern": r"\b(hello|hi|hey|good\s*(morning|afternoon|evening)|yo|sup|howdy|greetings)\b", "weight": 1.0},
+            ],
+            IntentType.HOW_ARE_YOU: [
+                {"pattern": r"\bhow\s+(are|'re|is)\s+(you|it\s+going)\b", "weight": 1.0},
+                {"pattern": r"\bhow('?s| is)\s+it\s+going\b", "weight": 1.0},
+                {"pattern": r"\b(what'?s|what is)\s+up\b", "weight": 0.9},
+            ],
+            IntentType.THANKS: [
+                {"pattern": r"\b(thanks|thank you|thankyou|thx|ty|appreciate it)\b", "weight": 1.0},
+            ],
+            IntentType.WHO_ARE_YOU: [
+                {"pattern": r"\b(who|what)\s+(are|is)\s+you\b", "weight": 1.0},
+                {"pattern": r"\btell\s+me\s+about\s+yourself\b", "weight": 1.0},
             ],
         }
     

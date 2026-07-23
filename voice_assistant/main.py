@@ -155,6 +155,44 @@ class VoiceAssistant:
             logger.error(f"Failed to initialize modules: {e}")
             raise
 
+    def _get_greeting_response(self) -> str:
+        """Return a friendly greeting response"""
+        import random
+        greetings = [
+            "Hey there! How can I help you today?",
+            "Hi! What can I do for you?",
+            "Hello! Ready to help — just say the word.",
+            "Hey! What's up?",
+            "Hello there! How can I assist you?",
+        ]
+        return random.choice(greetings)
+    
+    def _get_how_are_you_response(self) -> str:
+        """Return a response to 'how are you'"""
+        import random
+        responses = [
+            "I'm doing great, thanks for asking! How can I help you?",
+            "All systems operational and ready to assist! What do you need?",
+            "Doing well! Just waiting for your command.",
+            "I'm good! What can I do for you?",
+        ]
+        return random.choice(responses)
+    
+    def _get_thanks_response(self) -> str:
+        """Return a response to 'thank you'"""
+        import random
+        responses = [
+            "You're welcome! Happy to help.",
+            "Anytime! Let me know if you need anything else.",
+            "Glad I could help!",
+            "No problem at all!",
+        ]
+        return random.choice(responses)
+    
+    def _get_who_are_you_response(self) -> str:
+        """Return a response to 'who are you'"""
+        return "I'm J.A.R.V.I.S. — your voice assistant for Linux system control. I can check your system stats, manage files, control volume and brightness, launch applications, and more. Say 'help' to see everything I can do!"
+    
     def _register_commands(self):
         """Register all voice commands with their handlers"""
         self.commands = {
@@ -230,6 +268,12 @@ class VoiceAssistant:
             "list_commands": self.help.list_commands,
             "show_tutorial": self.help.show_tutorial,
             "search_help": self.help.search_help,
+            
+            # Greetings / Chitchat
+            "greeting": self._get_greeting_response,
+            "how_are_you": self._get_how_are_you_response,
+            "thanks": self._get_thanks_response,
+            "who_are_you": self._get_who_are_you_response,
         }
 
     def speak(self, text: str, suppress_long: bool = True):
@@ -272,7 +316,7 @@ class VoiceAssistant:
 
         if command.intent not in self.commands:
             response = ResponseFormatter.info(
-                f"I don't understand: {text}. Say 'help' for available commands."
+                f"Hmm, I don't know that one yet. Try saying 'help' to see what I can do!"
             )
             self.state = AssistantState.IDLE
             return self._format_final_response(response, command.intent, text)
