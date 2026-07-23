@@ -14,6 +14,9 @@ import logging
 logging.basicConfig(level=logging.INFO, format='[INSTALLER] %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Determine the directory where this installer script resides
+INSTALLER_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def run_command(cmd, shell=False, sudo=False):
     """Run a system command and return success"""
     if sudo and platform.system() != "Windows" and os.getuid() != 0:
@@ -59,7 +62,8 @@ def install_linux_dependencies(distro):
         pkgs = [
             "python3-dev", "python3-pip", "python3-venv",
             "build-essential", "portaudio19-dev", "libasound2-dev", "libpulse-dev",
-            "libespeak1", "espeak", "alsa-utils", "pulseaudio", "brightnessctl", "xrandr"
+            "libespeak1", "espeak", "alsa-utils", "pulseaudio", "brightnessctl",
+            "x11-xserver-utils"
         ]
         return run_command(["apt-get", "install", "-y"] + pkgs, sudo=True)
         
@@ -96,10 +100,8 @@ def install_linux_dependencies(distro):
 
 def setup_config_file():
     """Ensure a default config.env exists"""
-    config_dir = Path("config") if "Path" in globals() else None
-    if not config_dir:
-        from pathlib import Path
-        config_dir = Path("config")
+    from pathlib import Path
+    config_dir = Path(INSTALLER_DIR) / "config"
         
     config_dir.mkdir(exist_ok=True)
     config_file = config_dir / "config.env"
@@ -153,7 +155,7 @@ def main():
             logger.warning("Homebrew not found. Please install portaudio manually.")
             
     # Step 2: Establish Virtual Environment
-    venv_dir = "venv"
+    venv_dir = os.path.join(INSTALLER_DIR, "venv")
     if not os.path.exists(venv_dir):
         logger.info("Creating a clean Python virtual environment...")
         subprocess.run([sys.executable, "-m", "venv", venv_dir], check=True)
@@ -172,7 +174,7 @@ def main():
     
     logger.info("Installing core Python packages inside venv...")
     # Read requirements
-    reqs_path = "voice_assistant/requirements.txt"
+    reqs_path = os.path.join(INSTALLER_DIR, "voice_assistant", "requirements.txt")
     if os.path.exists(reqs_path):
         subprocess.run([pip_path, "install", "-r", reqs_path], check=True)
     else:
@@ -187,7 +189,7 @@ def main():
     
     # Step 5: Boot J.A.R.V.I.S.!
     logger.info("Setup complete! Initializing J.A.R.V.I.S. Core Web HUD...")
-    server_path = "voice_assistant/web_server.py"
+    server_path = os.path.join(INSTALLER_DIR, "voice_assistant", "web_server.py")
     
     try:
         # Start server and let it run

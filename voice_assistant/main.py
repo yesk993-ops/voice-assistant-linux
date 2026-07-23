@@ -14,22 +14,27 @@ from dataclasses import dataclass
 from enum import Enum
 import json
 
+# Ensure the project root is on sys.path for correct imports
+_project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
 # Load configuration
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(os.path.join(_project_root, "config", "config.env"))
 
 # Import modules
-from modules.speech import SpeechRecognizer
-from modules.tts import TextToSpeech
-from modules.power import PowerManager
-from modules.apps import ApplicationLauncher
-from modules.files import FileSystemManager
-from modules.system_settings import SystemSettingsManager
-from modules.system_commands import SystemCommandsManager
-from modules.system_monitor import SystemMonitor
-from modules.help import HelpSystem
-from modules.command_parser import CommandParser
-from modules.response_formatter import (
+from voice_assistant.modules.speech import SpeechRecognizer
+from voice_assistant.modules.tts import TextToSpeech
+from voice_assistant.modules.power import PowerManager
+from voice_assistant.modules.apps import ApplicationLauncher
+from voice_assistant.modules.files import FileSystemManager
+from voice_assistant.modules.system_settings import SystemSettingsManager
+from voice_assistant.modules.system_commands import SystemCommandsManager
+from voice_assistant.modules.system_monitor import SystemMonitor
+from voice_assistant.modules.help import HelpSystem
+from voice_assistant.modules.command_parser import CommandParser
+from voice_assistant.modules.response_formatter import (
     ResponseFormatter, QueryClassifier, StructuredResponse,
     ResponseType, Verbosity
 )
@@ -71,8 +76,10 @@ class VoiceAssistant:
         "show_uptime", "show_users", "system_summary",
     }
     
-    def __init__(self, config_path: str = "config/config.env"):
+    def __init__(self, config_path: str = None):
         """Initialize the voice assistant with all modules"""
+        if config_path is None:
+            config_path = os.path.join(_project_root, "config", "config.env")
         self.config_path = config_path
         self.state = AssistantState.IDLE
         self.running = False

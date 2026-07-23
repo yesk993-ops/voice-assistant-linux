@@ -9,8 +9,10 @@ import logging
 from flask import Flask, jsonify, request, render_template_string
 from pathlib import Path
 
-# Add parent directory to path so imports work correctly
-sys.path.append(str(Path(__file__).parent.parent))
+# Add project root to path so imports work correctly
+_project_root = str(Path(__file__).parent.parent)
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
 from voice_assistant.main import VoiceAssistant
 from voice_assistant.modules.response_formatter import ResponseType
