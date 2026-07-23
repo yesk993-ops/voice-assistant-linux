@@ -212,9 +212,29 @@ def main():
     logger.info("Installing core Python packages inside venv...")
     reqs_path = os.path.join(INSTALLER_DIR, "voice_assistant", "requirements.txt")
     if os.path.exists(reqs_path):
-        subprocess.run([pip_path, "install", "-r", reqs_path], check=True)
+        result = subprocess.run([pip_path, "install", "-r", reqs_path])
+        if result.returncode != 0:
+            logger.warning("Some core packages failed to install. Trying individual installs...")
+            # Fallback: install each package individually so one failure doesn't block others
+            with open(reqs_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        pkg = line.split("#")[0].strip().split(">=")[0].split("==")[0].strip()
+                        if pkg:
+                            subprocess.run([pip_path, "install", pkg])
     else:
         logger.warning(f"Could not find requirements at {reqs_path}")
+
+    # Install optional native-compiled packages (best-effort — may fail on some systems)
+    logger.info("Installing optional system-control packages (best-effort)...")
+    optional_pkgs = ["pyaudio", "pynput"]
+    for pkg in optional_pkgs:
+        result = subprocess.run([pip_path, "install", pkg])
+        if result.returncode == 0:
+            logger.info(f"  ✓ {pkg} installed successfully")
+        else:
+            logger.info(f"  - {pkg} skipped (not available on this system — this is OK)")
 
     # Ensure Flask is installed
     logger.info("Installing Flask web server...")
