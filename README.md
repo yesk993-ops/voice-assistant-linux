@@ -12,14 +12,14 @@ This assistant includes a **smart cross-platform installer** that automatically 
 ### 🐧 For All Linux Flavors (Ubuntu, RHEL, Arch, Fedora, openSUSE, etc.)
 Open your terminal and run this single-line command:
 ```bash
-curl -sSL "https://raw.githubusercontent.com/yesk993-ops/voice-assistant-linux/arena/019f8db5-voice-assistant-linux/installer.py" | python3
+curl -sSL "https://raw.githubusercontent.com/yesk993-ops/voice-assistant-linux/main/installer.py" | python3
 ```
 *Note: The installer automatically handles standard dependency installation, using `sudo` on your system package manager (`apt`, `dnf`, `pacman`, or `zypper`) as necessary.*
 
 ### 🪟 For Windows
 Open your PowerShell terminal and run:
 ```powershell
-curl -o installer.py "https://raw.githubusercontent.com/yesk993-ops/voice-assistant-linux/arena/019f8db5-voice-assistant-linux/installer.py"; python installer.py
+curl -o installer.py "https://raw.githubusercontent.com/yesk993-ops/voice-assistant-linux/main/installer.py"; python installer.py
 ```
 
 ---
@@ -69,7 +69,7 @@ If you prefer to clone the repository and run things manually, follow these inst
 ### 1. Pre-requisites (System packages)
 * **Debian/Ubuntu**:
   ```bash
-  sudo apt install -y python3-dev python3-venv portaudio19-dev libasound2-dev libpulse-dev espeak alsa-utils pulseaudio brightnessctl xrandr
+  sudo apt install -y python3-dev python3-venv portaudio19-dev libasound2-dev libpulse-dev espeak alsa-utils pulseaudio brightnessctl x11-xserver-utils
   ```
 * **RHEL/Fedora/CentOS**:
   ```bash

@@ -14,8 +14,35 @@ import logging
 logging.basicConfig(level=logging.INFO, format='[INSTALLER] %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Determine the directory where this installer script resides
-INSTALLER_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_URL = "https://github.com/yesk993-ops/voice-assistant-linux.git"
+
+
+def get_project_root():
+    """
+    Determine the project root directory.
+    If the installer was piped via stdin (curl | python3), clone the repo first.
+    Otherwise, use the directory where this script lives (local checkout).
+    """
+    # Detect if running from stdin (piped script)
+    is_stdin = __file__ in ("-", "<stdin>", "", None) or not os.path.isfile(__file__)
+
+    if is_stdin:
+        # Running via curl | python3 — clone the repo
+        target_dir = os.path.join(os.getcwd(), "voice-assistant-linux")
+        if os.path.isdir(target_dir):
+            logger.info(f"Found existing clone at {target_dir}")
+        else:
+            logger.info(f"Cloning repository into {target_dir}...")
+            subprocess.run(["git", "clone", "--depth=1", REPO_URL, target_dir], check=True)
+            logger.info("Repository cloned successfully.")
+        return target_dir
+    else:
+        # Running from a local file — use the script's directory
+        return os.path.dirname(os.path.abspath(__file__))
+
+
+INSTALLER_DIR = get_project_root()
+
 
 def run_command(cmd, shell=False, sudo=False):
     """Run a system command and return success"""
@@ -24,7 +51,7 @@ def run_command(cmd, shell=False, sudo=False):
             cmd = ["sudo"] + cmd
         else:
             cmd = f"sudo {cmd}"
-            
+
     logger.info(f"Executing: {cmd}")
     try:
         subprocess.run(cmd, shell=shell, check=True)
@@ -32,6 +59,7 @@ def run_command(cmd, shell=False, sudo=False):
     except Exception as e:
         logger.error(f"Command failed: {e}")
         return False
+
 
 def get_linux_distro():
     """Identify the Linux distribution family"""
@@ -51,10 +79,11 @@ def get_linux_distro():
         logger.warning(f"Could not read /etc/os-release: {e}")
     return "unknown"
 
+
 def install_linux_dependencies(distro):
     """Install audio, compilers and settings packages based on distro family"""
     logger.info(f"Installing system packages for Linux flavor: {distro.upper()}")
-    
+
     if distro == "debian":
         logger.info("Updating apt package lists...")
         run_command(["apt-get", "update"], sudo=True)
@@ -66,7 +95,7 @@ def install_linux_dependencies(distro):
             "x11-xserver-utils"
         ]
         return run_command(["apt-get", "install", "-y"] + pkgs, sudo=True)
-        
+
     elif distro == "rhel":
         # Group install development tools and headers
         logger.info("Installing development tools and EPEL if needed...")
@@ -77,7 +106,7 @@ def install_linux_dependencies(distro):
             "espeak", "brightnessctl", "xrandr"
         ]
         return run_command(["dnf", "install", "-y"] + pkgs, sudo=True)
-        
+
     elif distro == "arch":
         pkgs = [
             "base-devel", "python", "python-pip",
@@ -85,7 +114,7 @@ def install_linux_dependencies(distro):
             "brightnessctl", "xorg-xrandr"
         ]
         return run_command(["pacman", "-S", "--needed", "--noconfirm"] + pkgs, sudo=True)
-        
+
     elif distro == "suse":
         pkgs = [
             "devel_basis", "python3-devel",
@@ -93,19 +122,20 @@ def install_linux_dependencies(distro):
             "espeak", "brightnessctl", "xrandr"
         ]
         return run_command(["zypper", "install", "-y"] + pkgs, sudo=True)
-        
+
     else:
         logger.warning("Unknown Linux distribution. Please ensure portaudio, espeak, pulseaudio are installed manually.")
         return True
+
 
 def setup_config_file():
     """Ensure a default config.env exists"""
     from pathlib import Path
     config_dir = Path(INSTALLER_DIR) / "config"
-        
+
     config_dir.mkdir(exist_ok=True)
     config_file = config_dir / "config.env"
-    
+
     if not config_file.exists():
         logger.info("Generating default configuration file at config/config.env...")
         config_content = """# J.A.R.V.I.S. System Configuration
@@ -134,11 +164,12 @@ UPDATE_COMMAND=sudo apt update && sudo apt upgrade -y
         config_file.write_text(config_content)
         logger.info("Configuration file written successfully.")
 
+
 def main():
     logger.info("=== J.A.R.V.I.S. SYSTEM CORE CONVERGENCE ===")
     os_name = platform.system()
     logger.info(f"Target System Operating System detected: {os_name.upper()}")
-    
+
     # Step 1: Install System dependencies
     if os_name == "Linux":
         distro = get_linux_distro()
@@ -153,13 +184,13 @@ def main():
             run_command(["brew", "install", "portaudio", "espeak"])
         else:
             logger.warning("Homebrew not found. Please install portaudio manually.")
-            
+
     # Step 2: Establish Virtual Environment
     venv_dir = os.path.join(INSTALLER_DIR, "venv")
     if not os.path.exists(venv_dir):
         logger.info("Creating a clean Python virtual environment...")
         subprocess.run([sys.executable, "-m", "venv", venv_dir], check=True)
-        
+
     # Get venv python/pip executables
     if os_name == "Windows":
         pip_path = os.path.join(venv_dir, "Scripts", "pip.exe")
@@ -167,11 +198,11 @@ def main():
     else:
         pip_path = os.path.join(venv_dir, "bin", "pip")
         python_path = os.path.join(venv_dir, "bin", "python")
-        
+
     # Step 3: Upgrade pip & install requirements
     logger.info("Upgrading pip inside the virtual environment...")
     subprocess.run([pip_path, "install", "--upgrade", "pip"], check=True)
-    
+
     logger.info("Installing core Python packages inside venv...")
     # Read requirements
     reqs_path = os.path.join(INSTALLER_DIR, "voice_assistant", "requirements.txt")
@@ -179,23 +210,24 @@ def main():
         subprocess.run([pip_path, "install", "-r", reqs_path], check=True)
     else:
         logger.warning(f"Could not find requirements at {reqs_path}")
-        
+
     # Ensure Flask is installed
     logger.info("Installing Flask web server...")
     subprocess.run([pip_path, "install", "flask"], check=True)
-    
+
     # Step 4: Write default configuration
     setup_config_file()
-    
+
     # Step 5: Boot J.A.R.V.I.S.!
     logger.info("Setup complete! Initializing J.A.R.V.I.S. Core Web HUD...")
     server_path = os.path.join(INSTALLER_DIR, "voice_assistant", "web_server.py")
-    
+
     try:
         # Start server and let it run
         subprocess.run([python_path, server_path])
     except KeyboardInterrupt:
         logger.info("J.A.R.V.I.S. server shut down by user request.")
+
 
 if __name__ == "__main__":
     main()
